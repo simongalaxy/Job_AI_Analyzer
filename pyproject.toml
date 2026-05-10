@@ -1,0 +1,12 @@
+[project]
+name = "langchain-jobresearch"
+version = "0.1.0"
+description = "This is a project to crawl the job advertisements from jobsdb.com.hk by keywords using crawl4ai, then extract job information using LLM and then store them to sqlite3 and then use langchain and ollama to generate job reserach report."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "crawl4ai>=0.7.8",
+    "dotenv>=0.9.9",
+    "ollama>=0.6.1",
+    "psycopg2-binary>=2.9.11",
+]

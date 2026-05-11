@@ -1,7 +1,6 @@
 from tools.logger import Logger
 from tools.webCrawler import WebCrawler
 from tools.OllamaSummarizer import OllamaSummarizer
-from old.EmbeddingGenerator import EmbeddingGenerator
 from tools.DBHandler import DBHandler
 from tools.OllamaResearcher import OllamaResearcher
 

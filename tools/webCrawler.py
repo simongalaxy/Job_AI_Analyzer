@@ -33,7 +33,7 @@ class WebCrawler:
         self.dispatcher = MemoryAdaptiveDispatcher(
             memory_threshold_percent=70,
             check_interval=1,
-            max_session_permit=6
+            max_session_permit=4
         )
         
         self.logger.info(f"{WebCrawler.__name__} initiated.")
@@ -56,11 +56,16 @@ class WebCrawler:
         job_links = []
         for i, result in enumerate(results):
             links = result.links.get("internal", [])
-            for link in links:
-                if re.search(pattern=r"\d+\?type=standard", string=link["href"]):
-                    job_links.append(link["href"])
+            filtered_links = [link["href"] for link in links if re.search(pattern=r"\d+\?type=standard", string=link["href"])]
+            job_links.append(filtered_links)
+            # for link in links:
+            #     if re.search(pattern=r"\d+\?type=standard", string=link["href"]):
+            #         job_links.append(link["href"])
+        total_job_links = 0
+        for links in job_links:
+            total_job_links += len(links)
             
-        self.logger.info(f"Total {len(job_links)} job page links crawled from {len(results)} search pages.")    
+        self.logger.info(f"Total {total_job_links} job page links crawled from {len(results)} search pages.")    
          
         return job_links
 
@@ -85,7 +90,10 @@ class WebCrawler:
         job_links = self._extract_job_links(results=results)
         
         # crawl all contents from each job pages.
-        job_results = asyncio.run(self._crawl_pages(urls=job_links, config=self.crawl_config_job))
+        job_results = []
+        for links in job_links:
+            results = asyncio.run(self._crawl_pages(urls=links, config=self.crawl_config_job))
+            job_results.extend(results)
         
         return job_results
         

@@ -13,7 +13,8 @@ class WebCrawler:
         self.browser_config = BrowserConfig(
             headless=True,
             text_mode=True,
-	        light_mode=True
+	        light_mode=True,
+            verbose=True
         )
         self.crawl_config_job = CrawlerRunConfig(
             scraping_strategy=LXMLWebScrapingStrategy(),
@@ -22,6 +23,7 @@ class WebCrawler:
             exclude_external_links=True,
             target_elements=['h1[data-automation="job-detail-title"]', 'div[data-automation="jobAdDetails"]'],  # Use valid CSS attribute selectors for better compatibility
             cache_mode=CacheMode.BYPASS,
+            wait_for_timeout=30000
         )
         self.crawl_config_search = CrawlerRunConfig(
             scraping_strategy=LXMLWebScrapingStrategy(),
@@ -29,6 +31,7 @@ class WebCrawler:
             exclude_social_media_domains=True,
             exclude_external_links=True,
             cache_mode=CacheMode.BYPASS,
+            wait_for_timeout=30000
         )
         self.dispatcher = MemoryAdaptiveDispatcher(
             memory_threshold_percent=70,

@@ -8,7 +8,7 @@ wheels/
 logs/
 .vscode/
 database/
-old/
+old_code/
 reports/
 
 # Virtual environments

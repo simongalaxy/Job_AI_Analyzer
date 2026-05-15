@@ -1,5 +1,5 @@
 from tools.logger import Logger
-from tools.webCrawler import WebCrawler
+from tools.WebCrawler import WebCrawler
 from tools.OllamaSummarizer import OllamaSummarizer
 from tools.DBHandler import DBHandler
 from tools.OllamaResearcher import OllamaResearcher

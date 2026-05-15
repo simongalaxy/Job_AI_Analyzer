@@ -38,35 +38,20 @@ class WebCrawler:
             check_interval=1,
             max_session_permit=4
         )
+        self.crawler = None # Important.
         
         self.logger.info(f"{WebCrawler.__name__} initiated.")
-
-
-    async def _crawl_pages(self, urls: List[str], config: CrawlerRunConfig) -> List[CrawlResult]:
-        async with AsyncWebCrawler(config=self.browser_config) as crawler:
-            results = await crawler.arun_many(
-                urls=urls, 
-                config=config,
-                dispatcher=self.dispatcher
-            )
-        self.logger.info(f"Total {len(results)} job pages crawled.")
-                
-        return results
     
-    
+    # supporting methods.
     def _extract_job_links(self, results: List[CrawlResult]) -> List[str]:
         # extract the job page links.
         job_links = []
+        total_job_links = 0
         for i, result in enumerate(results):
             links = result.links.get("internal", [])
             filtered_links = [link["href"] for link in links if re.search(pattern=r"\d+\?type=standard", string=link["href"])]
             job_links.append(filtered_links)
-            # for link in links:
-            #     if re.search(pattern=r"\d+\?type=standard", string=link["href"]):
-            #         job_links.append(link["href"])
-        total_job_links = 0
-        for links in job_links:
-            total_job_links += len(links)
+            total_job_links += len(filtered_links)
             
         self.logger.info(f"Total {total_job_links} job page links crawled from {len(results)} search pages.")    
          
@@ -79,25 +64,47 @@ class WebCrawler:
         
         return urls
 
+    async def init_crawler(self):
+        self.crawler = AsyncWebCrawler(config=self.browser_config)
 
-    def crawl_all_job_pages(self, keyword: str, total_pages: int) -> List[CrawlResult]: 
+    # async crawler.
+    async def _crawl_pages(self, urls: List[str], config: CrawlerRunConfig) -> List[CrawlResult]:
+        async with self.crawler:
+            results = await self.crawler.arun_many(
+                urls=urls, 
+                config=config,
+                dispatcher=self.dispatcher
+            )
+        self.logger.info(f"Total {len(results)} pages crawled.")
+                
+        return results
+
+
+    async def _crawl_all_job_pages_async(self, keyword: str, total_pages: int) -> List[CrawlResult]: 
+        
+        # initiate AsyncWebCrawler object.
+        await self.init_crawler()
+        
         # Generate search pages.
         urls = self._generate_urls(keyword=keyword, total_page=total_pages)
         for i, url in enumerate(urls):
             print(f"{i}: {url}")
 
+        self.logger.info(f"Start crawling total {len(urls)} search pages.")
         # crawl all links for job pages from search pages.
-        results = asyncio.run(self._crawl_pages(urls=urls, config=self.crawl_config_search))
+        results = await self._crawl_pages(urls=urls, config=self.crawl_config_search)
         
         # extract job ad links.
         job_links = self._extract_job_links(results=results)
         
-        # crawl all contents from each job pages.
+        # crawl all contents from each job pages by batch.
         job_results = []
         for links in job_links:
-            results = asyncio.run(self._crawl_pages(urls=links, config=self.crawl_config_job))
+            results = await self._crawl_pages(urls=links, config=self.crawl_config_job)
             job_results.extend(results)
         
         return job_results
-        
-        
+    
+    
+    def crawl_all_job_pages(self, keyword: str, total_pages: int) -> List[CrawlResult]:
+        return asyncio.run(self._crawl_all_job_pages_async(keyword=keyword, total_pages=total_pages))

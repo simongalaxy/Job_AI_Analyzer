@@ -1,5 +1,7 @@
 import psycopg2
 import psycopg2.extras
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+
 import os
 from dotenv import load_dotenv
 from pprint import pformat
@@ -27,9 +29,38 @@ class DBHandler:
         self.conn.autocommit = True
         
         self.logger.info(f"DBHandler initialized and connected to {self.db_name}")
-        self.create_table()
+        
+        # ensure database and table was created.
+        self._ensure_database_exists()
+        self._create_table()
 
-    def create_table(self) -> None:
+
+    def _ensure_database_exists(self) -> None:
+        """
+        Check if a PostgreSQL database exists. 
+        If not, create it. If yes, do nothing.
+        """
+
+        # Step 1 — connect to default 'postgres' database
+        self.conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+        
+        with self.conn.cursor() as cur:
+            # Step 2 — check if database exists
+            cur.execute("SELECT 1 FROM pg_database WHERE datname = %s;", (self.db_name,))
+            exists = cur.fetchone()
+
+            if exists:
+                print(f"Database '{self.db_name}' already exists — skipping creation.")
+            else:
+                print(f"Database '{self.db_name}' does not exist — creating now...")
+                cur.execute(f'CREATE DATABASE "{self.db_name}";')
+                print(f"Database '{self.db_name}' created successfully.")
+
+        return
+
+    
+    
+    def _create_table(self) -> None:
         create_table_query = """
         CREATE TABLE IF NOT EXISTS JobAd (
             id TEXT PRIMARY KEY,                    -- Changed from SERIAL
@@ -55,6 +86,8 @@ class DBHandler:
         except Exception as e:
             self.logger.error(f"Failed to create table: {e}")
             raise
+        
+        return
 
     def insert_job(self, job_item: JobInfo) -> str | None:
         """Insert or update a job. Returns the job id on success."""

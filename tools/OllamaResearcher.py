@@ -10,7 +10,6 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-# from tools.writeReport import write_report
 
 class OllamaResearcher:
     def __init__(self, logger):
@@ -82,6 +81,9 @@ class OllamaResearcher:
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"Job_Report_keyword-{keyword}_{ts}.md"
         filepath = "./reports/"
+        
+        # check whether the report folder is created. if no, create a new folder.
+        os.makedirs(filepath, exist_ok=True)
         
         # generate report in text file.
         with open(os.path.join(filepath, filename), "w", encoding="utf-8") as file:
@@ -161,3 +163,5 @@ class OllamaResearcher:
         if self.conn and not self.conn.closed:
             self.conn.close()
             self.logger.info("Database connection closed.")
+            
+       

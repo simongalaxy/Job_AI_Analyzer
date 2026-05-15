@@ -49,14 +49,6 @@ def main():
             for job in job_infos:
                 dbhandler.insert_job(job_item=job)
         
-        
-        # # Extract information from job ads.
-        # job_infos = asyncio.run(summarizer.summarize_all_jobs(results=job_results, keyword=keyword))
-
-        # # save data to postgresql.
-        # for job in job_infos:
-        #     dbhandler.insert_job(job_item=job)
-        
         # generate report.
         researcher.generate_job_market_report(keyword=keyword)
        

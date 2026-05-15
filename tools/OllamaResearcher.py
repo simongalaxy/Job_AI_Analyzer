@@ -59,11 +59,45 @@ class OllamaResearcher:
             # 3. Strong system + user prompt
             system_prompt = "You are a precise, data-driven job market analyst. Generate reports using ONLY the provided data. Never invent information."
 
-            user_prompt = f"""Generate a professional Job Market Research Report based on the following data.
+            user_prompt = f"""You are an expert labor‑market analyst specializing in AI and LLM roles.
 
             Data:
             {json.dumps(insights, indent=2, ensure_ascii=False)}
 
+            Using the aggregated dataset, produce a deep, multi‑layer analysis including:
+
+            1. Skill Trends
+            - Which skills dominate?
+            - Which skills cluster together?
+            - Which skills indicate seniority?
+
+            2. Role Distribution
+            - Engineering vs Education vs Product vs Data roles.
+            - What does the distribution imply about market maturity?
+
+            3. Technology Stack Insights
+            - Python, LangChain, LangGraph, PyTorch, Kubernetes.
+            - What does this stack say about the hiring direction?
+
+            4. Company Type Analysis
+            - Banks, AI startups, EdTech, consulting.
+            - What patterns appear in responsibilities and required experience?
+
+            5. Experience Patterns
+            - What experience is most valued?
+            - What does this imply about candidate expectations?
+
+            6. Market Interpretation
+            - What does this dataset say about the LLM job market in 2025–2026?
+            - What are the emerging trends?
+            - What skills are becoming mandatory?
+
+            7. Actionable Insights
+            - What should a job seeker focus on?
+            - What skills give the highest leverage?
+
+            Write the analysis in 6–10 paragraphs with depth, insight, and interpretation.
+            
             Rules:
             - Use only the exact items and counts from the data above.
             - Do not add any job titles, skills, or experiences that are not listed.
@@ -71,7 +105,22 @@ class OllamaResearcher:
             - Output in clean Markdown format.
 
             Return the full report in Markdown.
+            
             """
+            
+            # user_prompt = f"""Generate a professional Job Market Research Report based on the following data.
+
+            # Data:
+            # {json.dumps(insights, indent=2, ensure_ascii=False)}
+
+            # Rules:
+            # - Use only the exact items and counts from the data above.
+            # - Do not add any job titles, skills, or experiences that are not listed.
+            # - Be factual and specific.
+            # - Output in clean Markdown format.
+
+            # Return the full report in Markdown.
+            # """
 
             # 4. Call Ollama directly
             response = self.client.chat(

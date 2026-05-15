@@ -8,8 +8,8 @@ class ExtractedJobInfo(BaseModel):
     company: Optional[str] = Field(default=None, description="company name")
     responsibilities: List[str] = Field(description="all the task responsibilities of the job")
     qualifications: List[str] = Field(description="all the job qualifications")
-    experiences: List[str] = Field(description="years of working expereiences")
-    skills: List[str] = Field(description="all the technical and soft skills")
+    experiences: List[str] = Field(description="years of working expereiences with description")
+    skills: List[str] = Field(description="all the technical skills and soft skills")
     salary: Optional[str] = Field(default=None, description="salary")
     working_location: Optional[str] = Field(default=None, description="working location")
 

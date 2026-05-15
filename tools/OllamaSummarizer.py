@@ -28,12 +28,14 @@ class OllamaSummarizer:
         content = result.markdown
 
         # Strong, clear prompt for extraction
-        prompt = f"""You are an expert job information extractor.
-        Extract the following fields from the job description. 
-        Only use information that actually appears in the text. 
-        If a field is not mentioned, use null or empty list.
+        prompt = f"""You are an expert job‑ad analyst. Extract and infer information with high precision.
 
-        Return ONLY valid JSON matching this schema. Do not add explanations.
+        TASKS:
+        1. Extract explicit information exactly as written.
+        2. If company name is missing, infer the company type (e.g., “fintech company”, “global bank”, “AI startup”).
+        3. Extract responsibilities and required experience.
+        4. Infer implicit skills (e.g., “cross‑functional collaboration” → communication, teamwork).
+        5. Summarize the job in structured JSON.
 
         Job Content:
         {content}

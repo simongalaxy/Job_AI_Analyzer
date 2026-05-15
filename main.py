@@ -37,12 +37,25 @@ def main():
             total_pages=int(total_search_pages)
         )
         
-        # Extract information from job ads.
-        job_infos = asyncio.run(summarizer.summarize_all_jobs(results=job_results, keyword=keyword))
+        # Extract informattion from job ads and save the info to postgresql by batches.
+        batch_size = 10
+        batches = [job_results[i:i+batch_size] for i in range(0, len(job_results), batch_size)]
+        
+        for batch in batches:
+            # Extract information from job ads.
+            job_infos = asyncio.run(summarizer.summarize_all_jobs(results=batch, keyword=keyword))
 
-        # save data to postgresql.
-        for job in job_infos:
-            dbhandler.insert_job(job_item=job)
+            # save data to postgresql.
+            for job in job_infos:
+                dbhandler.insert_job(job_item=job)
+        
+        
+        # # Extract information from job ads.
+        # job_infos = asyncio.run(summarizer.summarize_all_jobs(results=job_results, keyword=keyword))
+
+        # # save data to postgresql.
+        # for job in job_infos:
+        #     dbhandler.insert_job(job_item=job)
         
         # generate report.
         researcher.generate_job_market_report(keyword=keyword)

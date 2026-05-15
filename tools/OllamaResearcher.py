@@ -15,64 +15,11 @@ class OllamaResearcher:
     def __init__(self, logger):
         self.logger = logger
 
-        # Database connection (using psycopg2 directly - faster & safer)
-        self.username = os.getenv("username")
-        self.password = os.getenv("password")
-        self.host = os.getenv("host")
-        self.port = os.getenv("port")
-        self.db_name = os.getenv("db_name")
-
-        if not all([self.username, self.password, self.host, self.port, self.db_name]):
-            raise ValueError("Missing database credentials in .env")
-
-        self.conn = psycopg2.connect(
-            dbname=self.db_name,
-            user=self.username,
-            password=self.password,
-            host=self.host,
-            port=self.port
-        )
-        self.conn.autocommit = True
-
         # Ollama setup
         self.model_name = os.getenv("OLLAMA_SUMMARIZATION_MODEL")
         self.client = Client()   # or AsyncClient() if you want async
 
         self.logger.info(f"Ollama Researcher initialized with model: {self.model_name}")
-
-
-    def _get_top_job_titles(self, keyword: str, limit: int = 15):
-        query = """
-            SELECT job_title, COUNT(*) as count
-            FROM public.jobad
-            WHERE keyword = %s AND job_title IS NOT NULL
-            GROUP BY job_title
-            ORDER BY count DESC
-            LIMIT %s;
-        """
-        with self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute(query, (keyword, limit))
-            return cur.fetchall()
-
-
-    def _get_top_items(self, keyword: str, column: str, limit: int = 20):
-        query = f"""
-            SELECT element, COUNT(*) as freq
-            FROM (
-                SELECT unnest({column}) AS element
-                FROM public.jobad
-                WHERE keyword = %s 
-                  AND {column} IS NOT NULL 
-                  AND array_length({column}, 1) > 0
-            ) sub
-            WHERE element IS NOT NULL AND TRIM(element) != ''
-            GROUP BY element
-            ORDER BY freq DESC
-            LIMIT %s;
-        """
-        with self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute(query, (keyword, limit))
-            return cur.fetchall()
 
 
     def _write_report(self, keyword: str, markdown: str) -> None:
@@ -92,17 +39,10 @@ class OllamaResearcher:
         return
 
 
-    def generate_job_market_report(self, keyword: str) -> None:
+    def generate_job_market_report(self, keyword: str, job_titles, skills, responsibilities, qualifications, experiences) -> None:
         self.logger.info(f"Generating job market report for keyword: '{keyword}'")
 
         try:
-            # 1. Fetch data efficiently
-            job_titles = self._get_top_job_titles(keyword, 10)
-            skills = self._get_top_items(keyword, "skills", 10)
-            responsibilities = self._get_top_items(keyword, "responsibilities", 20)
-            qualifications = self._get_top_items(keyword, "qualifications", 5)
-            experiences = self._get_top_items(keyword, "experiences", 5)
-
             total_jobs = sum(row["count"] for row in job_titles)
 
             # 2. Prepare clean insights (much smaller than before)
@@ -159,9 +99,5 @@ class OllamaResearcher:
             self.logger.error(f"Failed to generate report for '{keyword}': {e}")
             raise
 
-    def close(self):
-        if self.conn and not self.conn.closed:
-            self.conn.close()
-            self.logger.info("Database connection closed.")
             
        

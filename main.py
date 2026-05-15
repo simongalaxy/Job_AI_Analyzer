@@ -28,6 +28,7 @@ def main():
             logger.info("User exited the application.")
             break
         total_search_pages = input("How many search pages to crawl? ")
+        
         # must convert query to a string in format "text-text-text" before searching.
         keyword = query.replace(" ", "-")
         
@@ -49,8 +50,41 @@ def main():
             for job in job_infos:
                 dbhandler.insert_job(job_item=job)
         
+        # fetch data from postgresql for generating report.
+        job_titles = dbhandler.get_top_job_titles(
+            keyword=keyword, 
+            limit=10
+        )
+        skills = dbhandler.get_top_items(
+            keyword=keyword, 
+            column="skills", 
+            limit=15
+        )
+        responsibilities = dbhandler.get_top_items(
+            keyword=keyword, 
+            column="responsibilities", 
+            limit=15
+        )
+        qualifications = dbhandler.get_top_items(
+            keyword=keyword, 
+            column="qualifications", 
+            limit=10
+        )
+        experiences = dbhandler.get_top_items(
+            keyword=keyword, 
+            column="experiences", 
+            limit=10
+        )
+        
         # generate report.
-        researcher.generate_job_market_report(keyword=keyword)
+        researcher.generate_job_market_report(
+            keyword=keyword,
+            job_titles=job_titles,
+            skills=skills,
+            responsibilities=responsibilities,
+            qualifications=qualifications,
+            experiences=experiences
+        )
        
     return
 

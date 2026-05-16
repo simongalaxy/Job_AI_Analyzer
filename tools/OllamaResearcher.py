@@ -55,6 +55,8 @@ class OllamaResearcher:
                 "top_qualifications": [{"item": r["element"], "count": r["freq"]} for r in qualifications],
                 "top_experiences": [{"item": r["element"], "count": r["freq"]} for r in experiences]
             }
+            
+            self.logger.info(f"insights: \n%s", insights)
 
             # 3. Strong system + user prompt
             system_prompt = "You are a precise, data-driven job market analyst. Generate reports using ONLY the provided data. Never invent information."

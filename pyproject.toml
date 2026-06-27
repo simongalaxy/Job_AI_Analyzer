@@ -1,5 +1,5 @@
 [project]
-name = "langchain-jobresearch"
+name = "Job AI Analyzer"
 version = "0.1.0"
 description = "This is a project to crawl the job advertisements from jobsdb.com.hk by keywords using crawl4ai, then extract job information using LLM and then store them to sqlite3 and then use langchain and ollama to generate job reserach report."
 readme = "README.md"

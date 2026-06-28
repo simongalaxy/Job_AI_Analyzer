@@ -75,6 +75,7 @@ class DBHandler:
             skills TEXT[],
             salary TEXT,
             working_location TEXT,
+            industry TEXT,
             created_at TIMESTAMPTZ DEFAULT NOW(),
             updated_at TIMESTAMPTZ DEFAULT NOW()
         );
@@ -95,9 +96,9 @@ class DBHandler:
         INSERT INTO JobAd (
             id, url, content, keyword, job_title, company,
             responsibilities, qualifications, experiences,
-            skills, salary, working_location
+            skills, salary, working_location, industry
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ON CONFLICT (id) DO UPDATE SET
             url = EXCLUDED.url,
             content = EXCLUDED.content,
@@ -110,6 +111,7 @@ class DBHandler:
             skills = EXCLUDED.skills,
             salary = EXCLUDED.salary,
             working_location = EXCLUDED.working_location,
+            industry = EXCLUDE.industry,
             updated_at = NOW()
         RETURNING id;
         """
@@ -127,6 +129,7 @@ class DBHandler:
             job_item.job_info.skills,
             job_item.job_info.salary,
             job_item.job_info.working_location,
+            job_item.job_info.industry
         )
 
         try:

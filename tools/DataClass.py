@@ -12,7 +12,7 @@ class ExtractedJobInfo(BaseModel):
     skills: List[str] = Field(description="all the technical skills and soft skills")
     salary: Optional[str] = Field(default=None, description="salary")
     working_location: Optional[str] = Field(default=None, description="working location")
-
+    industry: Optional[str] = Field(default=None, description="industry of company type inferred") 
 
 class JobInfo(BaseModel):
     id: str = Field(description="job id")

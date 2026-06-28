@@ -17,8 +17,8 @@ def main():
     logger = Logger(__name__).get_logger()
     crawler = WebCrawler(logger=logger)
     summarizer = OllamaSummarizer(logger=logger)
-    dbhandler = DBHandler(logger=logger)
-    researcher = OllamaResearcher(logger=logger)
+    # dbhandler = DBHandler(logger=logger)
+    # researcher = OllamaResearcher(logger=logger)
     
     # chat loop.
     while True:
@@ -51,40 +51,40 @@ def main():
                 dbhandler.insert_job(job_item=job)
         
         # fetch data from postgresql for generating report.
-        job_titles = dbhandler.get_top_job_titles(
-            keyword=keyword, 
-            limit=10
-        )
-        skills = dbhandler.get_top_items(
-            keyword=keyword, 
-            column="skills", 
-            limit=15
-        )
-        responsibilities = dbhandler.get_top_items(
-            keyword=keyword, 
-            column="responsibilities", 
-            limit=15
-        )
-        qualifications = dbhandler.get_top_items(
-            keyword=keyword, 
-            column="qualifications", 
-            limit=10
-        )
-        experiences = dbhandler.get_top_items(
-            keyword=keyword, 
-            column="experiences", 
-            limit=10
-        )
+        # job_titles = dbhandler.get_top_job_titles(
+        #     keyword=keyword, 
+        #     limit=10
+        # )
+        # skills = dbhandler.get_top_items(
+        #     keyword=keyword, 
+        #     column="skills", 
+        #     limit=15
+        # )
+        # responsibilities = dbhandler.get_top_items(
+        #     keyword=keyword, 
+        #     column="responsibilities", 
+        #     limit=15
+        # )
+        # qualifications = dbhandler.get_top_items(
+        #     keyword=keyword, 
+        #     column="qualifications", 
+        #     limit=10
+        # )
+        # experiences = dbhandler.get_top_items(
+        #     keyword=keyword, 
+        #     column="experiences", 
+        #     limit=10
+        # )
         
         # generate report.
-        researcher.generate_job_market_report(
-            keyword=keyword,
-            job_titles=job_titles,
-            skills=skills,
-            responsibilities=responsibilities,
-            qualifications=qualifications,
-            experiences=experiences
-        )
+        # researcher.generate_job_market_report(
+        #     keyword=keyword,
+        #     job_titles=job_titles,
+        #     skills=skills,
+        #     responsibilities=responsibilities,
+        #     qualifications=qualifications,
+        #     experiences=experiences
+        # )
        
     return
 

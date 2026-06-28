@@ -32,10 +32,11 @@ class OllamaSummarizer:
 
         TASKS:
         1. Extract explicit information exactly as written.
-        2. If company name is missing, infer the company type (e.g., “fintech company”, “global bank”, “AI startup”).
-        3. Extract responsibilities and required experience.
-        4. Infer implicit skills (e.g., “cross‑functional collaboration” → communication, teamwork).
-        5. Summarize the job in structured JSON.
+        2. Get the company name from the context. If company name is missing, just state None.
+        3. infer the industry by the content only (e.g., “fintech company”, “global bank”, “AI startup”), no explanation needed.
+        4. Extract core responsibilities and required experience.
+        5. Extract technical skills and infer implicit skills (e.g., “cross‑functional collaboration” → communication, teamwork).
+        6. Summarize the job in structured JSON.
 
         Job Content:
         {content}
@@ -89,6 +90,7 @@ class OllamaSummarizer:
                     skills=None,
                     salary=None,
                     working_location=None,
+                    industry=None,
                 ),
                 embedding=None,
             )

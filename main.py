@@ -47,8 +47,8 @@ def main():
             job_infos = asyncio.run(summarizer.summarize_all_jobs(results=batch, keyword=keyword))
 
             # save data to postgresql.
-            for job in job_infos:
-                dbhandler.insert_job(job_item=job)
+            # for job in job_infos:
+            #     dbhandler.insert_job(job_item=job)
         
         # fetch data from postgresql for generating report.
         # job_titles = dbhandler.get_top_job_titles(

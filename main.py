@@ -3,12 +3,13 @@ from tools.WebCrawler import WebCrawler
 from tools.OllamaSummarizer import OllamaSummarizer
 from tools.DBHandler import DBHandler
 from tools.OllamaResearcher import OllamaResearcher
+# from tools.Settings import settings
 
 from pprint import pformat
 import os
 import asyncio
-from dotenv import load_dotenv
-load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()
 
 
 # main program.
@@ -17,8 +18,8 @@ def main():
     logger = Logger(__name__).get_logger()
     crawler = WebCrawler(logger=logger)
     summarizer = OllamaSummarizer(logger=logger)
-    # dbhandler = DBHandler(logger=logger)
-    # researcher = OllamaResearcher(logger=logger)
+    dbhandler = DBHandler(logger=logger)
+    researcher = OllamaResearcher(logger=logger)
     
     # chat loop.
     while True:
@@ -47,44 +48,53 @@ def main():
             job_infos = asyncio.run(summarizer.summarize_all_jobs(results=batch, keyword=keyword))
 
             # save data to postgresql.
-            # for job in job_infos:
-            #     dbhandler.insert_job(job_item=job)
+            for job in job_infos:
+                dbhandler.insert_job(job_item=job)
         
         # fetch data from postgresql for generating report.
-        # job_titles = dbhandler.get_top_job_titles(
-        #     keyword=keyword, 
-        #     limit=10
-        # )
-        # skills = dbhandler.get_top_items(
-        #     keyword=keyword, 
-        #     column="skills", 
-        #     limit=15
-        # )
-        # responsibilities = dbhandler.get_top_items(
-        #     keyword=keyword, 
-        #     column="responsibilities", 
-        #     limit=15
-        # )
-        # qualifications = dbhandler.get_top_items(
-        #     keyword=keyword, 
-        #     column="qualifications", 
-        #     limit=10
-        # )
-        # experiences = dbhandler.get_top_items(
-        #     keyword=keyword, 
-        #     column="experiences", 
-        #     limit=10
-        # )
+        job_titles = dbhandler.get_top_items_in_column(
+            keyword=keyword, 
+            column="job_title",
+            limit=10
+        )
         
-        # generate report.
-        # researcher.generate_job_market_report(
-        #     keyword=keyword,
-        #     job_titles=job_titles,
-        #     skills=skills,
-        #     responsibilities=responsibilities,
-        #     qualifications=qualifications,
-        #     experiences=experiences
-        # )
+        industries = dbhandler.get_top_items_in_column(
+            keyword=keyword, 
+            column="industry", 
+            limit=10
+        )
+        
+        skills = dbhandler.get_top_items(
+            keyword=keyword, 
+            column="skills", 
+            limit=15
+        )
+        responsibilities = dbhandler.get_top_items(
+            keyword=keyword, 
+            column="responsibilities", 
+            limit=15
+        )
+        qualifications = dbhandler.get_top_items(
+            keyword=keyword, 
+            column="qualifications", 
+            limit=10
+        )
+        experiences = dbhandler.get_top_items(
+            keyword=keyword, 
+            column="experiences", 
+            limit=10
+        )
+        
+        #generate report.
+        researcher.generate_job_market_report(
+            keyword=keyword,
+            job_titles=job_titles,
+            industries=industries,
+            skills=skills,
+            responsibilities=responsibilities,
+            qualifications=qualifications,
+            experiences=experiences
+        )
        
     return
 

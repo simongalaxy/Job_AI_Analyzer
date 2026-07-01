@@ -9,4 +9,6 @@ dependencies = [
     "dotenv>=0.9.9",
     "ollama>=0.6.1",
     "psycopg2-binary>=2.9.11",
+    "pydantic>=2.12.5",
+    "pydantic-settings>=2.14.2",
 ]

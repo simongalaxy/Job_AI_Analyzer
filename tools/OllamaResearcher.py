@@ -54,7 +54,7 @@ class OllamaResearcher:
                 "keyword": keyword,
                 "total_jobs": total_jobs,
                 "top_job_titles": [{"title": r["job_title"], "count": r["count"]} for r in job_titles],
-                "top_industries": [{"industry": r["element"], "count": r["freq"]} for r in industries],
+                "top_industries": [{"industry": r["industry"], "count": r["freq"]} for r in industries],
                 "top_skills": [{"skill": r["element"], "count": r["freq"]} for r in skills],
                 "top_responsibilities": [{"item": r["element"], "count": r["freq"]} for r in responsibilities],
                 "top_qualifications": [{"item": r["element"], "count": r["freq"]} for r in qualifications],

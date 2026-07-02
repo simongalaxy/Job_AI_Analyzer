@@ -3,13 +3,10 @@ from tools.WebCrawler import WebCrawler
 from tools.OllamaSummarizer import OllamaSummarizer
 from tools.DBHandler import DBHandler
 from tools.OllamaResearcher import OllamaResearcher
-# from tools.Settings import settings
+from tools.Settings import settings
 
 from pprint import pformat
-import os
 import asyncio
-# from dotenv import load_dotenv
-# load_dotenv()
 
 
 # main program.
@@ -40,7 +37,7 @@ def main():
         )
         
         # Extract informattion from job ads and save the info to postgresql by batches.
-        batch_size = 10
+        batch_size = settings.batch_size
         batches = [job_results[i:i+batch_size] for i in range(0, len(job_results), batch_size)]
         
         for batch in batches:

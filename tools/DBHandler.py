@@ -2,11 +2,8 @@ import psycopg2
 import psycopg2.extras
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
-# import os
-# from dotenv import load_dotenv
 from pprint import pformat
 
-# load_dotenv()
 
 from tools.DataClass import JobInfo
 from tools.Settings import settings

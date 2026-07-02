@@ -29,6 +29,9 @@ class Settings(BaseSettings):
     # crawl4ai settings.
     playwright_skip_browser_download: int
     
+    # batch size
+    batch_size: int
+    
     
     # pydantic settings config.
     model_config = SettingsConfigDict(

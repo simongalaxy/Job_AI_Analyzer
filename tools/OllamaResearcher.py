@@ -6,9 +6,8 @@ from pathlib import Path
 import textwrap
 from datetime import datetime
 import json
-# import os
-# from dotenv import load_dotenv
-# load_dotenv()
+import os
+
 
 from tools.Settings import settings
 

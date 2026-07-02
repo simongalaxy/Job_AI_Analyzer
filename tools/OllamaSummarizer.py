@@ -7,10 +7,6 @@ from tools.Settings import settings
 import asyncio
 from pprint import pformat
 from typing import List
-# import os
-# from dotenv import load_dotenv
-
-# load_dotenv()
 
 
 class OllamaSummarizer:

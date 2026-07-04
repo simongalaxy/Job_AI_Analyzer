@@ -1,21 +1,15 @@
 from ollama import AsyncClient
 from crawl4ai import CrawlResult
-
-from tools.DataClass import JobInfo, ExtractedJobInfo
-
 import asyncio
 from pprint import pformat
 from typing import List
-import os
-from dotenv import load_dotenv
 
-load_dotenv()
-
-
+from src.DataClass import JobInfo, ExtractedJobInfo
+from src.Settings import settings
 class OllamaJobExtractor:
     def __init__(self, logger):
         self.logger = logger
-        self.model_name = os.getenv("OLLAMA_EXTRACTION_MODEL")
+        self.model_name = settings.ollama_extraction_model
         if not self.model_name:
             raise ValueError("OLLAMA_EXTRACTION_MODEL not set in .env file")
         
@@ -66,8 +60,7 @@ class OllamaJobExtractor:
                 url=url,
                 content=content,
                 keyword=keyword,
-                job_info=extracted,
-                embedding=None,   # To be filled later
+                job_info=extracted
             )
 
             self.logger.info("Successfully extracted job: \n%s", pformat(job_info.model_dump(), indent=4))
@@ -89,12 +82,12 @@ class OllamaJobExtractor:
                     responsibilities=None,
                     qualifications=None,
                     experiences=None,
-                    skills=None,
+                    technical_skills=None,
+                    soft_skills=None,
                     salary=None,
                     working_location=None,
                     industry=None,
-                ),
-                embedding=None,
+                )
             )
 
     async def summarize_all_jobs(self, results: List[CrawlResult], keyword: str) -> List[JobInfo]:

@@ -22,5 +22,4 @@ class JobInfo(BaseModel):
     content: str = Field(description="Original job ad content")
     keyword: str = Field(description="keyword for searching job ad")
     job_info: Optional[ExtractedJobInfo] | None = Field(description="extracted job information from llm")
-    # embedding: Optional[List[float]] | None = Field(description="embedding vector for the job info")
-    
+   

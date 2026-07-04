@@ -879,10 +879,6 @@ dependencies = [
     { name = "dotenv" },
     { name = "ollama" },
     { name = "psycopg2-binary" },
-<<<<<<< HEAD
-=======
-    { name = "pydantic" },
->>>>>>> 88fedd89179290f7b6265cde508819f68667d224
     { name = "pydantic-settings" },
 ]
 
@@ -892,10 +888,6 @@ requires-dist = [
     { name = "dotenv", specifier = ">=0.9.9" },
     { name = "ollama", specifier = ">=0.6.1" },
     { name = "psycopg2-binary", specifier = ">=2.9.11" },
-<<<<<<< HEAD
-=======
-    { name = "pydantic", specifier = ">=2.12.5" },
->>>>>>> 88fedd89179290f7b6265cde508819f68667d224
     { name = "pydantic-settings", specifier = ">=2.14.2" },
 ]
 

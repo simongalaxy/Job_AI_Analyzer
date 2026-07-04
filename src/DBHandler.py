@@ -1,23 +1,19 @@
 import psycopg2
 import psycopg2.extras
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
-
-import os
-from dotenv import load_dotenv
 from pprint import pformat
 
-load_dotenv()
-
-from tools.DataClass import JobInfo
+from src.DataClass import JobInfo
+from src.Settings import settings
 
 class DBHandler:
     def __init__(self, logger):
         self.logger = logger
-        self.username = settings.username #os.getenv("username")
-        self.password = settings.password #os.getenv("password")
-        self.host = settings.host #os.getenv("host")
-        self.port = settings.port #os.getenv("port")
-        self.db_name = settings.db_name #os.getenv("db_name")
+        self.username = settings.username
+        self.password = settings.password
+        self.host = settings.host
+        self.port = settings.port
+        self.db_name = settings.db_name
 
         if not all([self.username, self.password, self.host, self.port, self.db_name]):
             raise ValueError("Missing database credentials in .env file")
@@ -159,7 +155,8 @@ class DBHandler:
         if self.conn and not self.conn.closed:
             self.conn.close()
             self.logger.info("Database connection closed.")
-            
+    
+        
     def get_top_job_titles(self, keyword: str, limit: int = 15):
         query = """
             SELECT job_title, COUNT(*) as count
@@ -172,6 +169,7 @@ class DBHandler:
         with self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.execute(query, (keyword, limit))
             return cur.fetchall()
+    
     
     def get_top_items(self, keyword: str, column: str, limit: int = 20):
         query = f"""

@@ -32,6 +32,9 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         extra="ignore"
     )
+    
+    # batch size for processing job ads in batches.
+    batch_size: int
 
 # Singleton instance of the settings.
 settings = Settings() # type: ignore

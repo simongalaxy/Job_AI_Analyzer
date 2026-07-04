@@ -1,4 +1,4 @@
-# 🧠 AI‑Powered Job Research Pipeline  
+# 🧠 AI‑Powered Job Research Pipeline  (Update in progress)
 High‑performance async pipeline for crawling, extracting, analyzing, and summarizing job postings using lightweight Ollama models and PostgreSQL JSONB storage.
 
 ---

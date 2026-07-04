@@ -1,10 +1,14 @@
 import psycopg2
 import psycopg2.extras
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+
+import os
+from dotenv import load_dotenv
 from pprint import pformat
 
-from src.Settings import settings
-from src.DataClass import JobInfo
+load_dotenv()
+
+from tools.DataClass import JobInfo
 
 class DBHandler:
     def __init__(self, logger):
@@ -110,7 +114,7 @@ class DBHandler:
             soft_skills = EXCLUDED.soft_skills,
             salary = EXCLUDED.salary,
             working_location = EXCLUDED.working_location,
-            industry = EXCLUDE.industry,
+            industry = EXCLUDED.industry,
             updated_at = NOW()
         RETURNING id;
         """
@@ -151,36 +155,24 @@ class DBHandler:
             # raise  
             return None
 
-    # def query(self, query: str):
-    #     """Execute a SELECT query and return all rows."""
-    #     try:
-    #         with self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-    #             cur.execute(query)
-    #             return cur.fetchall()
-    #     except Exception as e:
-    #         self.logger.error(f"Query failed: {e}")
-    #         return []
-
     def close(self):
         if self.conn and not self.conn.closed:
             self.conn.close()
             self.logger.info("Database connection closed.")
-
-         
+            
     def get_top_job_titles(self, keyword: str, limit: int = 15):
         query = """
             SELECT job_title, COUNT(*) as count
             FROM public.jobad
-            WHERE keyword = %s AND job_title IS NOT NULL
-            GROUP BY job_title
+            WHERE keyword = %s AND {column} IS NOT NULL
+            GROUP BY {column}
             ORDER BY count DESC
             LIMIT %s;
         """
         with self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.execute(query, (keyword, limit))
             return cur.fetchall()
-
- 
+    
     def get_top_items(self, keyword: str, column: str, limit: int = 20):
         query = f"""
             SELECT element, COUNT(*) as freq

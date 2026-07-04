@@ -2,9 +2,7 @@ import logging
 import os
 from datetime import datetime
 
-from dotenv import load_dotenv
-load_dotenv()
-
+from tools.Settings import settings
 
 class Logger:
     def __init__(self, name: str):
@@ -17,8 +15,8 @@ class Logger:
         """
         # Generate a filename with current datetime
         self.log_filename = f"app_log_{datetime.now().strftime('%Y-%m-%d_%H_%M_%S')}.log"
-        self.log_filepath = os.getenv("LOGPATH")
-        self.log_level = os.getenv("LOG_LEVEL")
+        self.log_filepath = settings.log_path #os.getenv("LOGPATH")
+        self.log_level = settings.log_level #os.getenv("LOG_LEVEL")
         self.log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
         self.date_format = "%Y-%m-%d %H:%M:%S"
         

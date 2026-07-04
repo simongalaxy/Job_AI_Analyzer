@@ -5,13 +5,22 @@ import textwrap
 from datetime import datetime
 import json
 import os
+<<<<<<< HEAD:src/OllamaResearcher.py
 
 from src.Settings import settings
+=======
+>>>>>>> 88fedd89179290f7b6265cde508819f68667d224:tools/OllamaResearcher.py
 
+
+from tools.Settings import settings
 
 class OllamaResearcher:
     def __init__(self, logger):
+        # logger setting.
         self.logger = logger
+        
+        # report path setting.
+        self.report_path = settings.report_path #os.getenv("REPORT_PATH")
 
         # Ollama setup
         self.model_name = settings.ollama_summarization_model #os.getenv("OLLAMA_SUMMARIZATION_MODEL")
@@ -25,7 +34,11 @@ class OllamaResearcher:
         # generate filename by daily press release url.
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"Job_Report_keyword-{keyword}_{ts}.md"
+<<<<<<< HEAD:src/OllamaResearcher.py
         filepath = settings.report_path
+=======
+        filepath = self.report_path
+>>>>>>> 88fedd89179290f7b6265cde508819f68667d224:tools/OllamaResearcher.py
         
         # check whether the report folder is created. if no, create a new folder.
         os.makedirs(filepath, exist_ok=True)
@@ -37,7 +50,7 @@ class OllamaResearcher:
         return
 
 
-    def generate_job_market_report(self, keyword: str, job_titles, skills, responsibilities, qualifications, experiences) -> None:
+    def generate_job_market_report(self, keyword: str, job_titles, skills, industries, responsibilities, qualifications, experiences) -> None:
         self.logger.info(f"Generating job market report for keyword: '{keyword}'")
 
         try:
@@ -48,6 +61,7 @@ class OllamaResearcher:
                 "keyword": keyword,
                 "total_jobs": total_jobs,
                 "top_job_titles": [{"title": r["job_title"], "count": r["count"]} for r in job_titles],
+                "top_industries": [{"industry": r["industry"], "count": r["freq"]} for r in industries],
                 "top_skills": [{"skill": r["element"], "count": r["freq"]} for r in skills],
                 "top_responsibilities": [{"item": r["element"], "count": r["freq"]} for r in responsibilities],
                 "top_qualifications": [{"item": r["element"], "count": r["freq"]} for r in qualifications],
@@ -100,6 +114,9 @@ class OllamaResearcher:
             - What should a job seeker focus on?
             - What skills give the highest leverage?
 
+            8. Industry Trends
+            - List out Top 10 industries
+            
             Write the analysis in 6–10 paragraphs with depth, insight, and interpretation.
             
             Rules:

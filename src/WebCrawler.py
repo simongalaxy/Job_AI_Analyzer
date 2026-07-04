@@ -14,7 +14,8 @@ class WebCrawler:
             headless=True,
             text_mode=True,
 	        light_mode=True,
-            verbose=True
+            verbose=True,
+            chrome_channel="chrome"
         )
         self.crawl_config_job = CrawlerRunConfig(
             scraping_strategy=LXMLWebScrapingStrategy(),
@@ -64,8 +65,10 @@ class WebCrawler:
         
         return urls
 
+
     async def init_crawler(self):
         self.crawler = AsyncWebCrawler(config=self.browser_config)
+
 
     # async crawler.
     async def _crawl_pages(self, urls: List[str], config: CrawlerRunConfig) -> List[CrawlResult]:

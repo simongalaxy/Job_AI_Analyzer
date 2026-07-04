@@ -1,18 +1,21 @@
+from ollama import AsyncClient
+from crawl4ai import CrawlResult
+
+from tools.DataClass import JobInfo, ExtractedJobInfo
 
 import asyncio
 from pprint import pformat
 from typing import List
-from ollama import AsyncClient
-from crawl4ai import CrawlResult
+import os
+from dotenv import load_dotenv
 
-from src.DataClass import JobInfo, ExtractedJobInfo
-from src.Settings import settings
+load_dotenv()
 
 
 class OllamaJobExtractor:
     def __init__(self, logger):
         self.logger = logger
-        self.model_name = settings.ollama_extraction_model
+        self.model_name = os.getenv("OLLAMA_EXTRACTION_MODEL")
         if not self.model_name:
             raise ValueError("OLLAMA_EXTRACTION_MODEL not set in .env file")
         

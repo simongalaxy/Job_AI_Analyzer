@@ -96,7 +96,7 @@ class DBHandler:
             responsibilities, qualifications, experiences,
             technical_skills, soft_skills, salary, working_location, industry
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ON CONFLICT (id) DO UPDATE SET
             url = EXCLUDED.url,
             content = EXCLUDED.content,
@@ -151,42 +151,41 @@ class DBHandler:
             # raise  
             return None
 
+
     def close(self):
         if self.conn and not self.conn.closed:
             self.conn.close()
             self.logger.info("Database connection closed.")
     
         
-    def get_top_job_titles(self, keyword: str, limit: int = 15):
-        query = """
-            SELECT job_title, COUNT(*) as count
+    def get_items_from_column(self, keyword: str, column:str):
+        query = f"""
+            SELECT {column}
             FROM public.jobad
-            WHERE keyword = %s AND {column} IS NOT NULL
-            GROUP BY {column}
-            ORDER BY count DESC
-            LIMIT %s;
+            WHERE keyword = %s AND {column} IS NOT NULL;
         """
         with self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute(query, (keyword, limit))
+            cur.execute(query, (keyword,))
             return cur.fetchall()
     
     
-    def get_top_items(self, keyword: str, column: str, limit: int = 20):
+    def get_items_from_array_column(self, keyword: str, column: str):
         query = f"""
-            SELECT element, COUNT(*) as freq
-            FROM (
                 SELECT unnest({column}) AS element
                 FROM public.jobad
-                WHERE keyword = %s 
-                  AND {column} IS NOT NULL 
-                  AND array_length({column}, 1) > 0
-            ) sub
-            WHERE element IS NOT NULL AND TRIM(element) != ''
-            GROUP BY element
-            ORDER BY freq DESC
-            LIMIT %s;
+                WHERE keyword = %s;
         """
         with self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute(query, (keyword, limit))
+            cur.execute(query, (keyword,))
             return cur.fetchall()
-        
+    
+     
+    def get_schema(self):
+        query = """
+            SELECT column_name, data_type
+            FROM information_schema.columns
+            WHERE table_name = 'jobad';
+        """
+        with self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute(query)
+            return cur.fetchall()

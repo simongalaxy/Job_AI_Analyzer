@@ -6,7 +6,9 @@ from typing import List
 
 from src.DataClass import JobInfo, ExtractedJobInfo
 from src.Settings import settings
-class OllamaJobExtractor:
+
+
+class JobExtractor:
     def __init__(self, logger):
         self.logger = logger
         self.model_name = settings.ollama_extraction_model
@@ -27,7 +29,7 @@ class OllamaJobExtractor:
         TASKS:
         1. Extract explicit information exactly as written.
         2. Get the company name from the context. If company name is missing, just state None.
-        3. Infer the industry by the content without explanation (e.g., “fintech company”, “global bank”, “AI startup”).
+        3. Read the job ad and output one industry label only. No Explanation (e.g., “fintech company”, “global bank”, “AI startup”). 
         4. Extract core responsibilities explicitly mentioned in the job ad.
         5. Extract core working experiences explicitly mentioned in the job ad.
         6. Extract technical skills (e.g. python, SQL, AWS) explicitly mentioned in the job ad.

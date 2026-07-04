@@ -8,16 +8,16 @@ import os
 
 from src.Settings import settings
 
-class OllamaResearcher:
+class MarketResearcher:
     def __init__(self, logger):
         # logger setting.
         self.logger = logger
         
         # report path setting.
-        self.report_path = settings.report_path #os.getenv("REPORT_PATH")
+        self.report_path = settings.report_path
 
         # Ollama setup
-        self.model_name = settings.ollama_summarization_model #os.getenv("OLLAMA_SUMMARIZATION_MODEL")
+        self.model_name = settings.ollama_report_model
         self.client = Client()   # or AsyncClient() if you want async
 
         self.logger.info(f"Ollama Researcher initialized with model: {self.model_name}")

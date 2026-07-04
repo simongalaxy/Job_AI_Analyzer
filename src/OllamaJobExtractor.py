@@ -1,21 +1,18 @@
-from ollama import AsyncClient
-from crawl4ai import CrawlResult
-
-from tools.DataClass import JobInfo, ExtractedJobInfo
 
 import asyncio
 from pprint import pformat
 from typing import List
-import os
-from dotenv import load_dotenv
+from ollama import AsyncClient
+from crawl4ai import CrawlResult
 
-load_dotenv()
+from src.DataClass import JobInfo, ExtractedJobInfo
+from src.Settings import settings
 
 
-class OllamaSummarizer:
+class OllamaJobExtractor:
     def __init__(self, logger):
         self.logger = logger
-        self.model_name = os.getenv("OLLAMA_EXTRACTION_MODEL")
+        self.model_name = settings.ollama_extraction_model
         if not self.model_name:
             raise ValueError("OLLAMA_EXTRACTION_MODEL not set in .env file")
         
@@ -33,10 +30,12 @@ class OllamaSummarizer:
         TASKS:
         1. Extract explicit information exactly as written.
         2. Get the company name from the context. If company name is missing, just state None.
-        3. infer the industry by the content only (e.g., “fintech company”, “global bank”, “AI startup”), no explanation needed.
-        4. Extract core responsibilities and required experience.
-        5. Extract technical skills and infer implicit skills (e.g., “cross‑functional collaboration” → communication, teamwork).
-        6. Summarize the job in structured JSON.
+        3. Infer the industry by the content without explanation (e.g., “fintech company”, “global bank”, “AI startup”).
+        4. Extract core responsibilities explicitly mentioned in the job ad.
+        5. Extract core working experiences explicitly mentioned in the job ad.
+        6. Extract technical skills (e.g. python, SQL, AWS) explicitly mentioned in the job ad.
+        7. Extract soft skills (e.g. communication, teamwork, problem-solving) explicitly mentioned in the job ad.
+        8. Summarize the job in structured JSON.
 
         Job Content:
         {content}

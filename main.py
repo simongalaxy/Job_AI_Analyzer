@@ -1,14 +1,11 @@
-from tools.logger import Logger
-from tools.WebCrawler import WebCrawler
-from tools.OllamaSummarizer import OllamaSummarizer
-from tools.DBHandler import DBHandler
-from tools.OllamaResearcher import OllamaResearcher
+from src.logger import Logger
+from src.WebCrawler import WebCrawler
+from src.OllamaJobExtractor import OllamaJobExtractor
+from src.DBHandler import DBHandler
+from src.OllamaResearcher import OllamaResearcher
 
 from pprint import pformat
-import os
 import asyncio
-from dotenv import load_dotenv
-load_dotenv()
 
 
 # main program.
@@ -16,8 +13,8 @@ def main():
     # initiate classes.
     logger = Logger(__name__).get_logger()
     crawler = WebCrawler(logger=logger)
-    summarizer = OllamaSummarizer(logger=logger)
-    # dbhandler = DBHandler(logger=logger)
+    summarizer = OllamaJobExtractor(logger=logger)
+    dbhandler = DBHandler(logger=logger)
     # researcher = OllamaResearcher(logger=logger)
     
     # chat loop.
@@ -47,8 +44,8 @@ def main():
             job_infos = asyncio.run(summarizer.summarize_all_jobs(results=batch, keyword=keyword))
 
             # save data to postgresql.
-            # for job in job_infos:
-            #     dbhandler.insert_job(job_item=job)
+            for job in job_infos:
+                 dbhandler.insert_job(job_item=job)
         
         # fetch data from postgresql for generating report.
         # job_titles = dbhandler.get_top_job_titles(

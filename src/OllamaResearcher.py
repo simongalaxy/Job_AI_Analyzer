@@ -1,14 +1,12 @@
 from ollama import Client   # Native Ollama client
-import psycopg2
-import psycopg2.extras
 from pprint import pformat
 from pathlib import Path
 import textwrap
 from datetime import datetime
 import json
 import os
-from dotenv import load_dotenv
-load_dotenv()
+
+from src.Settings import settings
 
 
 class OllamaResearcher:
@@ -16,7 +14,7 @@ class OllamaResearcher:
         self.logger = logger
 
         # Ollama setup
-        self.model_name = os.getenv("OLLAMA_SUMMARIZATION_MODEL")
+        self.model_name = settings.ollama_summarization_model #os.getenv("OLLAMA_SUMMARIZATION_MODEL")
         self.client = Client()   # or AsyncClient() if you want async
 
         self.logger.info(f"Ollama Researcher initialized with model: {self.model_name}")
@@ -27,7 +25,7 @@ class OllamaResearcher:
         # generate filename by daily press release url.
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"Job_Report_keyword-{keyword}_{ts}.md"
-        filepath = "./reports/"
+        filepath = settings.report_path
         
         # check whether the report folder is created. if no, create a new folder.
         os.makedirs(filepath, exist_ok=True)

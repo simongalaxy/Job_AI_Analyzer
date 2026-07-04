@@ -40,7 +40,7 @@ class JobAdCrawler:
         )
         self.crawler = None # Important.
         
-        self.logger.info(f"{WebCrawler.__name__} initiated.")
+        self.logger.info(f"{JobAdCrawler.__name__} initiated.")
     
     # supporting methods.
     def _extract_job_links(self, results: List[CrawlResult]) -> List[str]:

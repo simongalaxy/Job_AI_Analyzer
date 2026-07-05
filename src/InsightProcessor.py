@@ -16,7 +16,7 @@ class InsightProcessor:
         self.model_name = settings.ollama_insight_model
         self.client = Client()   # or AsyncClient() if you want async
 
-        self.logger.info(f"Ollama Researcher initialized with model: {self.model_name}")
+        self.logger.info(f"Insigher Processor initialized with model: {self.model_name}")
 
     
     def _ask_ollama(self, prompt:str, column_name: str, stage: str) -> str:
@@ -24,14 +24,17 @@ class InsightProcessor:
                         model=self.model_name,
                         messages=[{"role": "user", "content": prompt}]
                     )["message"]["content"]
-        self.logger.info(f"Ollama response for {column_name} - {stage}:\n{response}")
+        # self.logger.info(f"Ollama response for {column_name} - {stage}:\n{response}")
         
         return response
     
     
-    def generate_insights(self, column: str, data: list[str]) -> str:
+    def generate_insights(self, column: str, data: list[str]) -> dict:
+        
+        dict = {}
         
         column_name = column.replace("_", " ")
+        
         self.logger.info(f"Generating insights for column: '{column_name}'")
         
         # Step 1: Cluster
@@ -63,4 +66,9 @@ class InsightProcessor:
         """
         insights = self._ask_ollama(insight_prompt, column_name=column_name, stage="Insights")
         
-        return insights
+        dict[column] = column_name
+        dict["clusters"] = clusters
+        dict["categories"] = categories
+        dict["insights"] = insights
+
+        return dict

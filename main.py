@@ -1,13 +1,15 @@
+from pprint import pformat
+import asyncio
+import json
+
 from src.Settings import settings
 from src.logger import Logger
 from src.JobAdCrawler import JobAdCrawler
 from src.JobExtractor import JobExtractor
 from src.DBHandler import DBHandler
 from src.InsightProcessor import InsightProcessor
+from src.ReportGenerator import create_report_object, write_section
 # from src.MarketResearcher import MarketResearcher
-
-from pprint import pformat
-import asyncio
 
 
 # main program.
@@ -52,21 +54,44 @@ def main():
         
         # fetch data from postgresql for generating insights from each columns.
         schema = dbhandler.get_schema()
+        # Ensure schema is a dict. DBHandler may return a JSON string.
+        if isinstance(schema, str):
+            try:
+                schema = json.loads(schema)
+            except json.JSONDecodeError:
+                logger.error("Failed to parse database schema JSON.")
+                schema = {}
         logger.info(f"Database schema: {pformat(schema)}")
 
-        job_titles = dbhandler.get_items_from_column(
-            keyword=keyword, 
-            column="job_title"
-        )
-        logger.info(f"Job titles for keyword '{keyword}': {pformat(job_titles)}")
+        # generate insights for selected columns in the database.
+        order = ["industry", "job_title", "responsibilities", "qualifications", "experiences", "technical_skills", "soft_skills"]
         
-        insights = insight_processor.generate_insights(
-            column="job_title",
-            data=job_titles,
-        )
-        logger.info(f"Insights for job titles: {pformat(insights)}")
+        # generate report for each column.
+        md_file = create_report_object(keyword=keyword)
+        logger.info(f"Report file created: {md_file.file_name}.md")
         
-        
+        # for column in json.loads(schema).keys():
+        for i in range(len(order)):
+            if schema[order[i]] == "text":   
+                items = dbhandler.get_items_from_column(
+                    keyword=keyword, 
+                    column=order[i]
+                )
+            else:
+                items = dbhandler.get_items_from_array_column(
+                    keyword=keyword, 
+                    column=order[i]
+                )
+                
+            insights_dict = insight_processor.generate_insights(
+                column=order[i],
+                data=items,
+            )
+            logger.info(f"Insights for column '{order[i]}': {pformat(insights_dict)}")
+
+            write_section(md_file=md_file, insights_dict=insights_dict, keyword=keyword, i=i, total_sections=len(order))
+            logger.info(f"Insights for column '{order[i]}' written to report.")
+                
         # #generate report.
         # researcher.generate_job_market_report(
         #     keyword=keyword,

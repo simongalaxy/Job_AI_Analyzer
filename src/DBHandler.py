@@ -1,7 +1,9 @@
+import json
 import psycopg2
 import psycopg2.extras
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from pprint import pformat
+
 
 from src.DataClass import JobInfo
 from src.Settings import settings
@@ -186,6 +188,18 @@ class DBHandler:
             FROM information_schema.columns
             WHERE table_name = 'jobad';
         """
+        skip_columns = {"created_at", "updated_at", "id", "content", "keyword", "company", "url", "content", "salary", "working_location"}
+        # order = ["industry", "job_title", "responsibilities", "qualifications", "experiences", "technical_skills", "soft_skills"]
+        
         with self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.execute(query)
-            return cur.fetchall()
+            schema_rows = cur.fetchall()
+            
+            # Convert list of dicts → single dict {column_name: data_type}
+            schema = {
+                row["column_name"]: row["data_type"] 
+                for row in schema_rows 
+                if row["column_name"] not in skip_columns
+            }
+
+            return json.dumps(schema, indent=2)

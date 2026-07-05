@@ -40,11 +40,13 @@ To solve this, the project uses **LLMs**, **Crawl4AI**, **Pydantic**, and **Post
 This system converts **unstructured job advertisement webpages** into **clean, structured data**, including:
 
 - Job title  
-- Company name  
-- Responsibilities  
-- Required skills  
+- Company name
+- Industry 
+- Responsibilities   
 - Qualifications  
-- Experience  
+- Experiences
+- Technical Skills
+- Soft Skills  
 - Salary  
 - Location  
 
@@ -100,20 +102,9 @@ This project uses two lightweight Ollama models with clear functional separation
   - generating human‑readable job overviews
 
 
-### **2. phi4:mini — Reasoning & Report Generation**
-- Small model with strong reasoning  
-- Fast summarization  
-- Ideal for generating:  
-  - job summaries  
-  - insights  
-  - skill analysis  
-  - market‑fit reports  
+### **2. llama3:8b - Formulating Clusters, Categorizing, Summarizing & Generating Insights.
+- Ideal for clustering, categorizing, summarizing, and generating insights 
 
-***Why this combination?***  
-**Both MiniMistral‑3:3B and Phi‑4 Mini — Optimized for MLX Acceleration**
-- Both models run significantly faster when executed through Ollama with the MLX backend
-- MLX provides lower latency, better memory efficiency, and higher throughput on Apple Silicon
-- Ideal for high‑concurrency pipelines where you need fast inference without sacrificing quality
 
 ---
 
@@ -126,11 +117,13 @@ Langchain_JobResearch/
 ├── reports/                   # save report generated. 
 ├── tools/
 │   ├── logger.py              # Logging utilities
+│   ├── Settings.py            # Get all the parameters using Pydantic-settings
+│   ├── ReportGenerator.py     # Generate report in markdown format.
 │   ├── DataClass.py           # Define pydantic classes to store data in different stages with validation
-│   ├── webCrawler.py          # Crawl job ads using Crawl4AI
-│   ├── OllamaSummarizer.py    # LLM-based job ad information extractor using Ollama LLM Model - nuextract
+│   ├── JobAdCrawler.py        # Crawl job ads using Crawl4AI
+│   ├── JobExtractor.py        # LLM-based job ad information extractor using Ollama LLM Model - nuextract
 │   ├── DBHandler.py           # Postgresql Database connection + CRUD
-│   └── OllamaResearcher.py      # LLM-based insights report generation using Ollama LLM Model - phi4:mini
+│   └── InsightProcessor.py    # LLM-based insights report generation using Ollama LLM Model - llama3:8b
 │
 ├── main.py                    # Main entry point
 ├── .env                       # Environment variables
@@ -143,16 +136,16 @@ Langchain_JobResearch/
 
 ## 🏗️ Main Components
 
-### WebCrawler
+### JobAdCrawler
 - Async Playwright‑based Crawl4AI
 - Timeout + retry watchdog
 - Outputs CrawlResult (Pydantic)
 
-### OllamaSummarizer
+### JobExtractor
 - Uses nuextract for structured extraction
 - Outputs ExtractedData (Pydantic)
 
-### OllamaResearcher
+### InsightProcessor
 - Uses phi4:mini for summarization & insights
 - Outputs Text file in markdown format
 
@@ -190,7 +183,7 @@ ollama pull phi4-mini
 ## Set up your .env file:
 POSTGRES_URL=your_postgres_connection_string
 OLLAMA_EXTRACTION_MODEL = ministral-3:3b
-OLLAMA_SUMMARIZATION_MODEL = phi4-mini:latest
+OLLAMA_INSIGHT_MODEL = llama3:8b
 
 ## Usage
 uv run main.py

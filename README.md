@@ -108,7 +108,7 @@ This project uses two lightweight Ollama models with clear functional separation
   - categorizing
   - generating insights 
 
-### 🧠 Why **Clustering, Categorizing & Generating Insights** works better than **one giant prompt** ?
+### 🧠 Why **Clustering, Categorizing & Generating Insights** works better than **One Giant Prompt** ?
 - avoids context window limits
 - reduces noise
 - improves accuracy

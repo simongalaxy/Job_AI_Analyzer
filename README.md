@@ -126,26 +126,28 @@ This project uses two lightweight Ollama models with clear functional separation
 
 ## 📁 Project Structure
 
-Job_AI_Analyst/
+```text
+📁 Job_AI_Analyst/
 │
-├── logs/                      # save the log files
-├── reports/                   # save report generated. 
-├── src/
-│   ├── logger.py              # Logging utilities
-│   ├── Settings.py            # Get all the parameters using Pydantic-settings for data validation
-│   ├── DataClass.py           # Define pydantic classes to store data in different stages with validation
-│   ├── JobAdCrawler.py        # Crawl job ads using Crawl4AI
-│   ├── JobExtractor.py        # LLM-based job ad information extractor using Ollama LLM Model - minimistral
-│   ├── DBHandler.py           # Postgresql Database connection + CRUD
-│   ├── InsightProcessor.py    # LLM-based **Clustering** -> **Categorizing** -> **Generating Insights** using Ollama LLM Model - llama3:8b
-│   └── ReportGenerator.py     # Generate report in markdown format.
+├── 📂 logs/                 # Log files
+├── 📂 reports/              # Generated reports
+├── 📂 src/
+│   ├── 📝 logger.py         # Logging utilities
+│   ├── ⚙️ Settings.py       # Pydantic-settings configuration
+│   ├── 📦 DataClass.py      # Pydantic data models
+│   ├── 🌐 JobAdCrawler.py   # Crawl job ads (Crawl4AI)
+│   ├── 🤖 JobExtractor.py   # LLM-based extractor (Ollama - minimistral)
+│   ├── 🗄️ DBHandler.py      # PostgreSQL CRUD
+│   ├── 🔍 InsightProcessor.py# Clustering → Categorizing → Insights (llama3:8b)
+│   └── 📑 ReportGenerator.py # Markdown report generator
 │
-├── main.py                    # Main entry point
-├── .env                       # Environment variables
-├── .gitignore
-├── pyproject.toml
-├── uv.lock
-└── README.md
+├── 🚀 main.py               # Main entry point
+├── 🔐 .env                  # Environment variables
+├── 🙈 .gitignore
+├── 📦 pyproject.toml
+├── 📦 uv.lock
+└── 📘 README.md
+```
 
 ---
 

@@ -17,11 +17,6 @@ Key design principles:
 
 ---
 
-## 🧩 Architecture
-
-The system follows a lightweight, LangGraph‑inspired state‑based design:
-
-
 
 ## 🌟 Motivation
 

@@ -17,10 +17,17 @@ def create_report_object(keyword: str) -> MdUtils:
     os.makedirs(filepath, exist_ok=True)
     
     # Create a new markdown file
-    md_file = MdUtils(file_name=filename, title=f"Job Market Insights Report - {keyword}", author="Job AI Analyzer",
+    md_file = MdUtils(file_name=filename, 
+                      title=f"Job Market Insights Report - {keyword}", 
+                      author="Job AI Analyzer",
                       description=f"Insights report for the keyword: {keyword}",
-                      cover_image_path=None, css_path=None, language='en',
-                      toc=True, toc_depth=2, filepath=filepath)
+                      cover_image_path=None, 
+                      css_path=None, 
+                      language='en',
+                      toc=True, 
+                      toc_depth=2, 
+                      filepath=filepath
+                    )
     
     return md_file
 

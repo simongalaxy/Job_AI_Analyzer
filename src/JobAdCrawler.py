@@ -105,6 +105,6 @@ class JobAdCrawler:
         
         return job_results
     
-    
+    # provide a synchronous interface for the async crawling method.
     def crawl_all_job_pages(self, keyword: str, total_pages: int) -> List[CrawlResult]:
         return asyncio.run(self._crawl_all_job_pages_async(keyword=keyword, total_pages=total_pages))

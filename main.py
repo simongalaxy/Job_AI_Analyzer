@@ -9,7 +9,6 @@ from src.JobExtractor import JobExtractor
 from src.DBHandler import DBHandler
 from src.InsightProcessor import InsightProcessor
 from src.ReportGenerator import create_report_object, write_section
-# from src.MarketResearcher import MarketResearcher
 
 
 # main program.
@@ -20,7 +19,6 @@ def main():
     extractor = JobExtractor(logger=logger)
     dbhandler = DBHandler(logger=logger)
     insight_processor = InsightProcessor(logger=logger)
-    # researcher = MarketResearcher(logger=logger)
     
     # chat loop.
     while True:
@@ -35,25 +33,26 @@ def main():
         keyword = query.replace(" ", "-")
         
         # crawl all job pages based on the keyword and save the extracted results to the postgresql database.
-        # job_results = crawler.crawl_all_job_pages(
-        #     keyword=keyword, 
-        #     total_pages=int(total_search_pages)
-        # )
+        job_results = crawler.crawl_all_job_pages(
+            keyword=keyword, 
+            total_pages=int(total_search_pages)
+        )
         
-        # # Extract informattion from job ads and save the info to postgresql by batches.
-        # batch_size = settings.batch_size
-        # batches = [job_results[i:i+batch_size] for i in range(0, len(job_results), batch_size)]
+        # Extract informattion from job ads and save the info to postgresql by batches.
+        batch_size = settings.batch_size
+        batches = [job_results[i:i+batch_size] for i in range(0, len(job_results), batch_size)]
         
-        # for batch in batches:
-        #     # Extract information from job ads.
-        #     job_infos = asyncio.run(extractor.summarize_all_jobs(results=batch, keyword=keyword))
+        for batch in batches:
+            # Extract information from job ads.
+            job_infos = asyncio.run(extractor.summarize_all_jobs(results=batch, keyword=keyword))
 
-        #     # save data to postgresql.
-        #     for job in job_infos:
-        #          dbhandler.insert_job(job_item=job)
+            # save data to postgresql.
+            for job in job_infos:
+                 dbhandler.insert_job(job_item=job)
         
         # fetch data from postgresql for generating insights from each columns.
         schema = dbhandler.get_schema()
+        
         # Ensure schema is a dict. DBHandler may return a JSON string.
         if isinstance(schema, str):
             try:
@@ -61,6 +60,7 @@ def main():
             except json.JSONDecodeError:
                 logger.error("Failed to parse database schema JSON.")
                 schema = {}
+        
         logger.info(f"Database schema: {pformat(schema)}")
 
         # generate insights for selected columns in the database.
@@ -70,7 +70,6 @@ def main():
         md_file = create_report_object(keyword=keyword)
         logger.info(f"Report file created: {md_file.file_name}.md")
         
-        # for column in json.loads(schema).keys():
         for i in range(len(order)):
             if schema[order[i]] == "text":   
                 items = dbhandler.get_items_from_column(
@@ -89,19 +88,17 @@ def main():
             )
             logger.info(f"Insights for column '{order[i]}': {pformat(insights_dict)}")
 
-            write_section(md_file=md_file, insights_dict=insights_dict, keyword=keyword, i=i, total_sections=len(order))
+            write_section(
+                md_file=md_file, 
+                insights_dict=insights_dict, 
+                keyword=keyword, 
+                i=i, 
+                total_sections=len(order)
+            )
+            
             logger.info(f"Insights for column '{order[i]}' written to report.")
-                
-        # #generate report.
-        # researcher.generate_job_market_report(
-        #     keyword=keyword,
-        #     job_titles=job_titles,
-        #     industries=industries,
-        #     skills=skills,
-        #     responsibilities=responsibilities,
-        #     qualifications=qualifications,
-        #     experiences=experiences
-        # )
+
+        logger.info(f"Report generation completed for keyword '{keyword}'. Report file: {md_file.file_name}.md")
        
     return
 

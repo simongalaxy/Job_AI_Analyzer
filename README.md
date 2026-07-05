@@ -102,28 +102,43 @@ This project uses two lightweight Ollama models with clear functional separation
   - generating human‑readable job overviews
 
 
-### **2. llama3:8b - Formulating Clusters, Categorizing, Summarizing & Generating Insights.
-- Ideal for clustering, categorizing, summarizing, and generating insights 
+### **2. llama3:8b - Clustering, Categorizing & Generating Insights**
+- is a good fit because of:
+- **Efficiency**: Smaller than 70B models, making it faster and more resource-friendly while still powerful.
+- **Versatility**: Handles multiple NLP tasks without needing separate specialized models.
+- **Local deployment**: Ollama allows running it locally, ensuring privacy and control over data.
 
+- Ideal for:
+  - clustering
+  - categorizing
+  - generating insights 
+
+### 🧠 Why **Clustering, Categorizing & Generating Insights** works better than **one giant prompt** ?
+- avoids context window limits
+- reduces noise
+- improves accuracy
+- prevents hallucinations
+- produces stable categories
+- allows deeper insight generation
 
 ---
 
 
 ## 📁 Project Structure
 
-Langchain_JobResearch/
+Job_AI_Analyst/
 │
 ├── logs/                      # save the log files
 ├── reports/                   # save report generated. 
-├── tools/
+├── src/
 │   ├── logger.py              # Logging utilities
-│   ├── Settings.py            # Get all the parameters using Pydantic-settings
-│   ├── ReportGenerator.py     # Generate report in markdown format.
+│   ├── Settings.py            # Get all the parameters using Pydantic-settings for data validation
 │   ├── DataClass.py           # Define pydantic classes to store data in different stages with validation
 │   ├── JobAdCrawler.py        # Crawl job ads using Crawl4AI
-│   ├── JobExtractor.py        # LLM-based job ad information extractor using Ollama LLM Model - nuextract
+│   ├── JobExtractor.py        # LLM-based job ad information extractor using Ollama LLM Model - minimistral
 │   ├── DBHandler.py           # Postgresql Database connection + CRUD
-│   └── InsightProcessor.py    # LLM-based insights report generation using Ollama LLM Model - llama3:8b
+│   ├── InsightProcessor.py    # LLM-based **Clustering** -> **Categorizing** -> **Generating Insights** using Ollama LLM Model - llama3:8b
+│   └── ReportGenerator.py     # Generate report in markdown format.
 │
 ├── main.py                    # Main entry point
 ├── .env                       # Environment variables
@@ -142,11 +157,11 @@ Langchain_JobResearch/
 - Outputs CrawlResult (Pydantic)
 
 ### JobExtractor
-- Uses nuextract for structured extraction
+- Uses **MiniMistral‑3:3B** for structured extraction
 - Outputs ExtractedData (Pydantic)
 
 ### InsightProcessor
-- Uses phi4:mini for summarization & insights
+- Uses **llama3:8b** for Clustering, Categorizing & Generating Insights for each items
 - Outputs Text file in markdown format
 
 ### DBHandler
@@ -170,24 +185,23 @@ Langchain_JobResearch/
 
 Clone the repository:
 
-git clone https://github.com/yourusername/Langchain_JobResearch.git
-cd Langchain_JobResearch
+- git clone https://github.com/simongalaxy/Job_AI_Analyzer.git
+- cd Job_AI_Analyzer
 
 # install dependences
-uv sync
+- uv sync
 
 # pull ollama LLM models
-ollama pull ministral-3:3b 
-ollama pull phi4-mini
+- ollama pull ministral-3:3b 
+- ollama pull llama3:8b
 
-## Set up your .env file:
-POSTGRES_URL=your_postgres_connection_string
-OLLAMA_EXTRACTION_MODEL = ministral-3:3b
-OLLAMA_INSIGHT_MODEL = llama3:8b
+## Set up your .env file: 
+- see .env file for details
 
 ## Usage
-uv run main.py
-type the keyword(e.g. AI) for searching relevant jobs.
+- uv run main.py
+- type the keyword(e.g. AI) for searching relevant jobs.
+- type the number of pages to scrape.
 
 ---
 

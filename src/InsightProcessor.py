@@ -66,6 +66,7 @@ class InsightProcessor:
         """
         insights = self._ask_ollama(insight_prompt, column_name=column_name, stage="Insights")
         
+        # consolidate the results into a dictionary.
         dict[column] = column_name
         dict["clusters"] = clusters
         dict["categories"] = categories

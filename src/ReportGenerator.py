@@ -17,16 +17,9 @@ def create_report_object(keyword: str) -> MdUtils:
     os.makedirs(filepath, exist_ok=True)
     
     # Create a new markdown file
-    md_file = MdUtils(file_name=filename, 
-                      title=f"Job Market Insights Report - {keyword}", 
-                      author="Job AI Analyzer",
-                      description=f"Insights report for the keyword: {keyword}",
-                      cover_image_path=None, 
-                      css_path=None, 
-                      language='en',
-                      toc=True, 
-                      toc_depth=2, 
-                      filepath=filepath
+    md_file = MdUtils(file_name=filename,
+                    title=f"Job Market Insights Report - {keyword}",
+                    author="Job AI Analyzer"
                     )
     
     return md_file
@@ -36,7 +29,7 @@ def write_section(md_file: MdUtils, insights_dict: dict, keyword: str, i: int, t
     
     # Iterate through the insights dictionary and add content to the markdown file
     for column, insights in insights_dict.items():
-        md_file.new_header(level=2, title=f"{column.replace('_', ' ')}")
+        md_file.new_header(level=2, title=f"{column.replace('_', ' ')}", add_table_of_contents=False)
         
         if isinstance(insights, dict):
             for key, value in insights.items():

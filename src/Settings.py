@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     
     # llm settings.
     ollama_extraction_model: str
+    ollama_clustering_model: str
+    ollama_categorizing_model: str
     ollama_insight_model: str
 
     # folder paths for reports.

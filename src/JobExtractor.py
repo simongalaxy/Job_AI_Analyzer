@@ -30,11 +30,12 @@ class JobExtractor:
         1. Extract explicit information exactly as written.
         2. Get the company name from the context. If company name is missing, just state None.
         3. Read the job ad and output one industry label only. No Explanation (e.g., “fintech company”, “global bank”, “AI startup”). 
-        4. Extract core responsibilities explicitly mentioned in the job ad.
-        5. Extract core working experiences explicitly mentioned in the job ad.
+        4. Extract core responsibilities explicitly mentioned in the job ad only.
+        5. Extract core working experiences (e.g. 5 years experience in AI) explicitly mentioned in the job ad only.
         6. Extract technical skills (e.g. python, SQL, AWS) explicitly mentioned in the job ad.
         7. Extract soft skills (e.g. communication, teamwork, problem-solving) explicitly mentioned in the job ad.
-        8. Summarize the job in structured JSON.
+        8. Extract all educational qualifications (e.g. Master or Bachelor in Engineering) and certificates (e.g. Certificate in PMP) explicitly mentioned in the job ad only.
+        9. Summarize the job in structured JSON.
 
         Job Content:
         {content}

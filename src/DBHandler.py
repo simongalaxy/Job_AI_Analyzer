@@ -164,7 +164,8 @@ class DBHandler:
         query = f"""
             SELECT {column}
             FROM public.jobad
-            WHERE keyword = %s AND {column} IS NOT NULL;
+            WHERE keyword = %s AND {column} IS NOT NULL
+            ORDER BY {column} ASC;
         """
         with self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.execute(query, (keyword,))
@@ -173,12 +174,13 @@ class DBHandler:
     
     def get_items_from_array_column(self, keyword: str, column: str):
         query = f"""
-                SELECT unnest({column}) AS element
+                SELECT unnest(string_to_array({column}, ', ')) AS element
                 FROM public.jobad
-                WHERE keyword = %s;
+                WHERE keyword = %s
+                ORDER BY element ASC;
         """
         with self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute(query, (keyword,))
+            cur.execute(query, (keyword, ))
             return cur.fetchall()
     
      

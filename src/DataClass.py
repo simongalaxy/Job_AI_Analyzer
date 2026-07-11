@@ -6,9 +6,9 @@ from crawl4ai import CrawlResult
 class ExtractedJobInfo(BaseModel):
     job_title: str = Field(description="job title")
     company: Optional[str] = Field(default=None, description="company name")
-    responsibilities: List[str] = Field(description="all the task responsibilities of the job")
-    qualifications: List[str] = Field(description="all the job qualifications")
-    experiences: List[str] = Field(description="working expereiences with description")
+    responsibilities: List[str] = Field(description="core responsibilities of the job")
+    qualifications: List[str] = Field(description="core educational qualifications and certificates")
+    experiences: List[str] = Field(description="required working expereiences")
     technical_skills: List[str] = Field(description="all the technical skills")
     soft_skills: List[str] = Field(description="all the soft skills")
     salary: Optional[str] = Field(default=None, description="salary")

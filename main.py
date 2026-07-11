@@ -34,7 +34,7 @@ def fetch_and_save_jobs(keyword: str, total_pages: int, logger: Logger, dbhandle
 
         # save data to postgresql.
         for job in job_infos:
-                dbhandler.insert_job(job_item=job)
+            dbhandler.insert_job(job_item=job)
     
     return
     
@@ -77,7 +77,7 @@ def retrieve_and_generate_insights(keyword: str, logger: Logger, dbhandler: DBHa
                 column=order[i]
             )
             
-        insights_dict = insight_processor.generate_insights(
+        insights_dict = insight_processor.process_items_to_insights(
             column=order[i],
             data=items,
         )
@@ -117,7 +117,7 @@ def main():
         keyword = query.replace(" ", "-")
         
         # crawl all job pages based on the keyword and save the extracted results to the postgresql database.
-        # fetch_and_save_jobs(keyword=keyword, total_pages=total_search_pages, logger=logger, dbhandler=dbhandler)
+        fetch_and_save_jobs(keyword=keyword, total_pages=int(total_search_pages), logger=logger, dbhandler=dbhandler)
         
         # retrieve and generate insights and report.
         retrieve_and_generate_insights(keyword=keyword, logger=logger, dbhandler=dbhandler)

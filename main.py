@@ -40,7 +40,7 @@ def fetch_and_save_jobs(keyword: str, total_pages: int, logger: Logger, dbhandle
     
     for i, batch in enumerate(batches, start=1):
         # Extract information from job ads.
-        Logger.info(f"Batch No. {i}: Start job information extraction.")
+        logger.info(f"Batch No. {i}: Start job information extraction.")
         extracted_infos = asyncio.run(extractor.summarize_all_jobs(results=batch, keyword=keyword))
 
         logger.info(f"Batch No. {i}: End job information extraction.")

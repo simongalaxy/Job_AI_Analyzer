@@ -1,10 +1,10 @@
 from ollama import AsyncClient
-from crawl4ai import CrawlResult
+from psycopg2.extras import RealDictRow
 import asyncio
 from pprint import pformat
 from typing import List
 
-from src.DataClass import JobInfo, ExtractedJobInfo
+from src.DataClass import ExtractedJobInfo
 from src.Settings import settings
 
 
@@ -18,10 +18,11 @@ class JobExtractor:
         self.client = AsyncClient()
         self.logger.info(f"Ollama Summarizer initialized with model: {self.model_name}")
 
-    async def _summarize_job_info(self, result: CrawlResult, keyword: str) -> JobInfo:
-        url = result.url
-        job_id = url.split("/")[-1].split("?")[0]
-        content = result.markdown
+    async def _summarize_job_info(self, result: RealDictRow, keyword: str) -> ExtractedJobInfo:
+        
+        # get the information from result.
+        id = result.get('id')
+        content = result.get("content")
 
         # Strong, clear prompt for extraction
         prompt = f"""You are an expert job‑ad analyst. Extract and infer information with high precision.
@@ -57,48 +58,33 @@ class JobExtractor:
             extracted = ExtractedJobInfo.model_validate_json(
                 response['message']['content']
             )
-
-            job_info = JobInfo(
-                id=job_id,
-                url=url,
-                content=content,
-                keyword=keyword,
-                job_info=extracted
-            )
-
-            self.logger.info("Successfully extracted job: \n%s", pformat(job_info.model_dump(), indent=4))
+            extracted.id = id
+            self.logger.info(f"Successfully extracted job for job id - {id}: \n%s", pformat(extracted.model_dump(), indent=4))
             self.logger.info("#"*50)
             
-            return job_info
+            return extracted
 
         except Exception as e:
-            self.logger.error(f"Failed to extract job {job_id}: {e}")
+            self.logger.error(f"Failed to extract job id - {id}: {e}")
             # Fallback: return basic info so the pipeline doesn't crash
-            return JobInfo(
-                id=job_id,
-                url=url,
-                content=content,
-                keyword=keyword,
-                job_info=ExtractedJobInfo(
-                    job_title=None,
-                    company=None,
-                    responsibilities=None,
-                    qualifications=None,
-                    experiences=None,
-                    technical_skills=None,
-                    soft_skills=None,
-                    salary=None,
-                    working_location=None,
-                    industry=None,
+            return ExtractedJobInfo(
+                    id=id,
+                    job_title="",
+                    responsibilities=[],
+                    qualifications=[],
+                    experiences=[],
+                    technical_skills=[],
+                    soft_skills=[],
+                    industry="",
                 )
-            )
 
-    async def summarize_all_jobs(self, results: List[CrawlResult], keyword: str) -> List[JobInfo]:
+
+    async def summarize_all_jobs(self, results: List[RealDictRow], keyword: str) -> List[ExtractedJobInfo]:
         self.logger.info(f"Starting extraction for {len(results)} jobs...")
 
         semaphore = asyncio.Semaphore(4)   # Tune this (3~6) based on your GPU/RAM
 
-        async def bounded_extract(result: CrawlResult):
+        async def bounded_extract(result: RealDictRow):
             async with semaphore:
                 return await self._summarize_job_info(result, keyword)
 

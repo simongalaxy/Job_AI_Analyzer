@@ -24,18 +24,31 @@ def fetch_and_save_jobs(keyword: str, total_pages: int, logger: Logger, dbhandle
         total_pages=int(total_pages)
     )
     
-    # Extract informattion from job ads and save the info to postgresql by batches.
+    logger.info(f"Total {len(job_results)} job advertisements crawled.")
+    logger.info(f"Start saving the raw data of job advertisments into database.")
+    
+    for result in job_results:
+        dbhandler.insert_job(keyword=keyword, result=result)
+    
+    logger.info(f"All crawled job advertisments raw data saved to the database.")
+    
+    # Extract information from job ads and save the info to postgresql by batches.
     batch_size = settings.batch_size
+    job_results = dbhandler.retrieve_raw_job_data(keyword=keyword)
+    
     batches = [job_results[i:i+batch_size] for i in range(0, len(job_results), batch_size)]
     
-    for batch in batches:
+    for i, batch in enumerate(batches, start=1):
         # Extract information from job ads.
-        job_infos = asyncio.run(extractor.summarize_all_jobs(results=batch, keyword=keyword))
+        Logger.info(f"Batch No. {i}: Start job information extraction.")
+        extracted_infos = asyncio.run(extractor.summarize_all_jobs(results=batch, keyword=keyword))
 
+        logger.info(f"Batch No. {i}: End job information extraction.")
         # save data to postgresql.
-        for job in job_infos:
-            dbhandler.insert_job(job_item=job)
-    
+        for job in extracted_infos:
+            dbhandler.update_job(job_item=job)
+        logger.info(f"Batch No. {i}: Saved to Database.")
+        
     return
     
     

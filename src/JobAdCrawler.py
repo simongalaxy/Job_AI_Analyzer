@@ -60,7 +60,7 @@ class JobAdCrawler:
 
     def _generate_urls(self, keyword: str, total_page: int) -> list[str]:
         urls = [f"https://hk.jobsdb.com/{keyword}-jobs?page={page}" for page in range(1, total_page+1)]
-        self.logger.info(f"Generated total {len(urls)} search pages - urls: {urls}")
+        self.logger.info(f"Generated total {len(urls)} search pages - urls: \n{urls}\n")
         
         return urls
 

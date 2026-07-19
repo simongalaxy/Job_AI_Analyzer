@@ -3,9 +3,9 @@ import psycopg2
 import psycopg2.extras
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from pprint import pformat
+from crawl4ai import CrawlResult
 
-
-from src.DataClass import JobInfo
+from src.DataClass import ExtractedJobInfo
 from src.Settings import settings
 
 class DBHandler:
@@ -57,7 +57,6 @@ class DBHandler:
         return
 
     
-    
     def _create_table(self) -> None:
         create_table_query = """
         CREATE TABLE IF NOT EXISTS JobAd (
@@ -66,14 +65,11 @@ class DBHandler:
             content TEXT,
             keyword TEXT,
             job_title TEXT,
-            company TEXT,
             responsibilities TEXT[],
             qualifications TEXT[],
             experiences TEXT[],
             technical_skills TEXT[],
             soft_skills TEXT[],
-            salary TEXT,
-            working_location TEXT,
             industry TEXT,
             created_at TIMESTAMPTZ DEFAULT NOW(),
             updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -90,48 +86,56 @@ class DBHandler:
         return
 
 
-    def insert_job(self, job_item: JobInfo) -> str | None:
+    def get_schema(self):
+        query = """
+            SELECT column_name, data_type
+            FROM information_schema.columns
+            WHERE table_name = 'jobad';
+        """
+        skip_columns = {"created_at", "updated_at", "id", "content", "keyword", "url"}
+        # order = ["industry", "job_title", "responsibilities", "qualifications", "experiences", "technical_skills", "soft_skills"]
+        
+        with self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute(query)
+            schema_rows = cur.fetchall()
+            
+            # Convert list of dicts → single dict {column_name: data_type}
+            schema = {
+                row["column_name"]: row["data_type"] 
+                for row in schema_rows 
+                if row["column_name"] not in skip_columns
+            }
+
+            return json.dumps(schema, indent=2)
+
+
+
+    # just add raw data of job info to database.
+    def insert_job(self, keyword: str, result: CrawlResult) -> str | None:
+        
+        # get the information crawlresult.
+        url = result.url
+        job_id = str(url.split("/")[-1].split("?")[0])
+        content = result.markdown
+        
         """Insert or update a job. Returns the job id on success."""
         insert_query = """
         INSERT INTO JobAd (
-            id, url, content, keyword, job_title, company,
-            responsibilities, qualifications, experiences,
-            technical_skills, soft_skills, salary, working_location, industry
+            id, url, content, keyword
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s)
         ON CONFLICT (id) DO UPDATE SET
             url = EXCLUDED.url,
             content = EXCLUDED.content,
-            keyword = EXCLUDED.keyword,
-            job_title = EXCLUDED.job_title,
-            company = EXCLUDED.company,
-            responsibilities = EXCLUDED.responsibilities,
-            qualifications = EXCLUDED.qualifications,
-            experiences = EXCLUDED.experiences,
-            technical_skills = EXCLUDED.technical_skills,
-            soft_skills = EXCLUDED.soft_skills,
-            salary = EXCLUDED.salary,
-            working_location = EXCLUDED.working_location,
-            industry = EXCLUDED.industry,
-            updated_at = NOW()
+            keyword = EXCLUDED.keyword
         RETURNING id;
         """
 
         values = (
-            job_item.id,
-            job_item.url,
-            job_item.content,
-            job_item.keyword,
-            job_item.job_info.job_title,
-            job_item.job_info.company,
-            job_item.job_info.responsibilities,
-            job_item.job_info.qualifications,
-            job_item.job_info.experiences,
-            job_item.job_info.technical_skills,
-            job_item.job_info.soft_skills,
-            job_item.job_info.salary,
-            job_item.job_info.working_location,
-            job_item.job_info.industry
+            job_id,
+            url,
+            content,
+            keyword,
         )
 
         try:
@@ -141,10 +145,57 @@ class DBHandler:
 
                 if row:
                     inserted_id = row["id"]
-                    self.logger.debug(f"Inserted/Updated job {inserted_id}")
+                    self.logger.debug(f"Inserted job {inserted_id}")
                     return inserted_id
                 else:
-                    self.logger.warning(f"No row returned for job {job_item.id}")
+                    self.logger.warning(f"No row returned for job {id}")
+                    return None
+
+        except Exception as e:
+            self.logger.error(f"Error inserting job {id}: {e}")
+            # Do NOT raise here if you want the pipeline to continue
+            # raise  
+            return None
+
+
+    # update the records in database with extracted job information to respective job accordingly.
+    def update_job(self, job_item: ExtractedJobInfo) -> str | None:
+        update_query = """UPDATE JobAd SET
+            job_title = %s,
+            responsibilities = %s,
+            qualifications = %s,
+            experiences = %s,
+            technical_skills = %s,
+            soft_skills = %s,
+            industry = %s,
+            updated_at = NOW()
+        WHERE id = %s
+        RETURNING id;
+        """
+
+        # Note that job_item.id moves to the VERY END of the tuple to match the WHERE clause
+        values = (
+            job_item.job_title,
+            job_item.responsibilities,
+            job_item.qualifications,
+            job_item.experiences,
+            job_item.technical_skills,
+            job_item.soft_skills,
+            job_item.industry,
+            job_item.id, 
+        )
+
+        try:
+            with self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+                cur.execute(update_query, values)
+                row = cur.fetchone()
+
+                if row:
+                    inserted_id = row["id"]
+                    self.logger.info(f"Inserted/Updated job id - {inserted_id}")
+                    return inserted_id
+                else:
+                    self.logger.info(f"No row returned for job id - {job_item.id}")
                     return None
 
         except Exception as e:
@@ -153,6 +204,17 @@ class DBHandler:
             # raise  
             return None
 
+
+    def retrieve_raw_job_data(self, keyword: str):
+        query = f"""
+            SELECT id, content
+            FROM public.jobad
+            WHERE keyword = %s AND content IS NOT NULL;
+        """
+        with self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute(query, (keyword,))
+            return cur.fetchall()
+        
 
     def close(self):
         if self.conn and not self.conn.closed:
@@ -182,26 +244,68 @@ class DBHandler:
         with self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.execute(query, (keyword, ))
             return cur.fetchall()
-    
-     
-    def get_schema(self):
-        query = """
-            SELECT column_name, data_type
-            FROM information_schema.columns
-            WHERE table_name = 'jobad';
-        """
-        skip_columns = {"created_at", "updated_at", "id", "content", "keyword", "company", "url", "content", "salary", "working_location"}
-        # order = ["industry", "job_title", "responsibilities", "qualifications", "experiences", "technical_skills", "soft_skills"]
-        
-        with self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute(query)
-            schema_rows = cur.fetchall()
-            
-            # Convert list of dicts → single dict {column_name: data_type}
-            schema = {
-                row["column_name"]: row["data_type"] 
-                for row in schema_rows 
-                if row["column_name"] not in skip_columns
-            }
 
-            return json.dumps(schema, indent=2)
+
+
+    # def insert_job(self, job_item: JobInfo) -> str | None:
+    #     """Insert or update a job. Returns the job id on success."""
+    #     insert_query = """
+    #     INSERT INTO JobAd (
+    #         id, url, content, keyword, job_title, company,
+    #         responsibilities, qualifications, experiences,
+    #         technical_skills, soft_skills, salary, working_location, industry
+    #     )
+    #     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    #     ON CONFLICT (id) DO UPDATE SET
+    #         url = EXCLUDED.url,
+    #         content = EXCLUDED.content,
+    #         keyword = EXCLUDED.keyword,
+    #         job_title = EXCLUDED.job_title,
+    #         company = EXCLUDED.company,
+    #         responsibilities = EXCLUDED.responsibilities,
+    #         qualifications = EXCLUDED.qualifications,
+    #         experiences = EXCLUDED.experiences,
+    #         technical_skills = EXCLUDED.technical_skills,
+    #         soft_skills = EXCLUDED.soft_skills,
+    #         salary = EXCLUDED.salary,
+    #         working_location = EXCLUDED.working_location,
+    #         industry = EXCLUDED.industry,
+    #         updated_at = NOW()
+    #     RETURNING id;
+    #     """
+
+    #     values = (
+    #         job_item.id,
+    #         job_item.url,
+    #         job_item.content,
+    #         job_item.keyword,
+    #         job_item.job_info.job_title,
+    #         job_item.job_info.company,
+    #         job_item.job_info.responsibilities,
+    #         job_item.job_info.qualifications,
+    #         job_item.job_info.experiences,
+    #         job_item.job_info.technical_skills,
+    #         job_item.job_info.soft_skills,
+    #         job_item.job_info.salary,
+    #         job_item.job_info.working_location,
+    #         job_item.job_info.industry
+    #     )
+
+    #     try:
+    #         with self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+    #             cur.execute(insert_query, values)
+    #             row = cur.fetchone()
+
+    #             if row:
+    #                 inserted_id = row["id"]
+    #                 self.logger.debug(f"Inserted/Updated job {inserted_id}")
+    #                 return inserted_id
+    #             else:
+    #                 self.logger.warning(f"No row returned for job {job_item.id}")
+    #                 return None
+
+    #     except Exception as e:
+    #         self.logger.error(f"Error inserting job {job_item.id}: {e}")
+    #         # Do NOT raise here if you want the pipeline to continue
+    #         # raise  
+    #         return None

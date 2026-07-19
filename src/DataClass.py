@@ -1,25 +1,14 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional
 
-from crawl4ai import CrawlResult
+
 
 class ExtractedJobInfo(BaseModel):
+    id: Optional[str] = Field(default=None, description="job id")
     job_title: str = Field(description="job title")
-    company: Optional[str] = Field(default=None, description="company name")
     responsibilities: List[str] = Field(description="core responsibilities of the job")
     qualifications: List[str] = Field(description="core educational qualifications and certificates")
     experiences: List[str] = Field(description="required working expereiences")
     technical_skills: List[str] = Field(description="all the technical skills")
     soft_skills: List[str] = Field(description="all the soft skills")
-    salary: Optional[str] = Field(default=None, description="salary")
-    working_location: Optional[str] = Field(default=None, description="working location")
-    industry: Optional[str] = Field(default=None, description="industry of the company") 
-
-
-class JobInfo(BaseModel):
-    id: str = Field(description="job id")
-    url: str = Field(description="job ad link")
-    content: str = Field(description="Original job ad content")
-    keyword: str = Field(description="keyword for searching job ad")
-    job_info: Optional[ExtractedJobInfo] | None = Field(description="extracted job information from llm")
-   
+    industry: Optional[str] = Field(default=None, description="industry of the company")

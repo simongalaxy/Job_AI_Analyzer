@@ -209,7 +209,7 @@ class DBHandler:
         query = f"""
             SELECT id, content
             FROM public.jobad
-            WHERE keyword = %s AND content IS NOT NULL;
+            WHERE keyword = %s AND content IS NOT NULL and job_title IS NULL;
         """
         with self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.execute(query, (keyword,))

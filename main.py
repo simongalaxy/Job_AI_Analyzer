@@ -35,6 +35,7 @@ def fetch_and_save_jobs(keyword: str, total_pages: int, logger: Logger, dbhandle
     # Extract information from job ads and save the info to postgresql by batches.
     batch_size = settings.batch_size
     job_results = dbhandler.retrieve_raw_job_data(keyword=keyword)
+    logger.info(f"Total {len(job_results)} job advertisement retrieved for keyword - {keyword}")
     
     batches = [job_results[i:i+batch_size] for i in range(0, len(job_results), batch_size)]
     

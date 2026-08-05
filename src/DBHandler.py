@@ -11,16 +11,20 @@ from src.Settings import settings
 class DBHandler:
     def __init__(self, logger):
         self.logger = logger
-        self.username = settings.username
-        self.password = settings.password
-        self.host = settings.host
-        self.port = settings.port
-        self.db_name = settings.db_name
+        
+        # postgres localhost connection parameters from settings.
+        # self.username = settings.username
+        # self.password = settings.password
+        # self.host = settings.host
+        # self.port = settings.port
+        # self.db_name = settings.db_name
 
-        if not all([self.username, self.password, self.host, self.port, self.db_name]):
-            raise ValueError("Missing database credentials in .env file")
+        # if not all([self.username, self.password, self.host, self.port, self.db_name]):
+        #     raise ValueError("Missing database credentials in .env file")
 
-        self.postgres_url = f"postgresql://{self.username}:{self.password}@{self.host}:{self.port}/{self.db_name}"
+        # self.postgres_url = f"postgresql://{self.username}:{self.password}@{self.host}:{self.port}/{self.db_name}"
+        self.postgres_url = settings.neon_uri
+        self.db_name = settings.neon_db_name
         
         # Create persistent connection with autocommit
         self.conn = psycopg2.connect(self.postgres_url)

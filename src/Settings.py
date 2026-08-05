@@ -18,6 +18,10 @@ class Settings(BaseSettings):
     port: str
     db_name: str
     
+    # neon database settings.
+    neon_uri: str
+    neon_db_name: str
+    
     # llm settings.
     ollama_extraction_model: str
     ollama_clustering_model: str

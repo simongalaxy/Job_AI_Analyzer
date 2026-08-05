@@ -1,110 +1,161 @@
-from crawl4ai import AsyncWebCrawler, CrawlerRunConfig, CacheMode, BrowserConfig, MemoryAdaptiveDispatcher, CrawlResult
-from crawl4ai.content_scraping_strategy import LXMLWebScrapingStrategy
-
-from typing import List
+from crawl4ai import (
+    AsyncWebCrawler,
+    CrawlerRunConfig,
+    CacheMode,
+    BrowserConfig,
+    MemoryAdaptiveDispatcher,
+    CrawlResult,
+)
+from typing import List, AsyncGenerator
 import asyncio
-from pprint import pformat
 import re
 
+from src.Settings import settings
 
 class JobAdCrawler:
     def __init__(self, logger):
         self.logger = logger
+
+        # 全局 browser 設定：只開一次
         self.browser_config = BrowserConfig(
             headless=True,
-            text_mode=True,
-	        light_mode=True,
-            verbose=True
+            verbose=True,
+            browser_type="chromium",
         )
-        self.crawl_config_job = CrawlerRunConfig(
-            scraping_strategy=LXMLWebScrapingStrategy(),
-            exclude_all_images=True,
-            exclude_social_media_domains=True,
-            exclude_external_links=True,
-            target_elements=['h1[data-automation="job-detail-title"]', 'div[data-automation="jobAdDetails"]'],  # Use valid CSS attribute selectors for better compatibility
-            cache_mode=CacheMode.BYPASS,
-            wait_for_timeout=30000
-        )
+
+        # 搜尋頁 config（多頁）
         self.crawl_config_search = CrawlerRunConfig(
-            scraping_strategy=LXMLWebScrapingStrategy(),
             exclude_all_images=True,
-            exclude_social_media_domains=True,
             exclude_external_links=True,
+            exclude_social_media_domains=True,
             cache_mode=CacheMode.BYPASS,
-            wait_for_timeout=30000
+            wait_for_timeout=20000,
+            stream=True,  # 用 streaming 處理大量 URL
         )
-        self.dispatcher = MemoryAdaptiveDispatcher(
-            memory_threshold_percent=70,
-            check_interval=1,
-            max_session_permit=4
+
+        # job 詳情頁 config
+        self.crawl_config_job = CrawlerRunConfig(
+            target_elements=[
+                'h1[data-automation="job-detail-title"]',
+                'div[data-automation="jobAdDetails"]',
+            ],
+            exclude_all_images=True,
+            cache_mode=CacheMode.BYPASS,
+            wait_for_timeout=20000,
+            stream=True,
         )
-        self.crawler = None # Important.
-        
-        self.logger.info(f"{JobAdCrawler.__name__} initiated.")
-    
-    # supporting methods.
-    def _extract_job_links(self, results: List[CrawlResult]) -> List[str]:
-        # extract the job page links.
-        job_links = []
-        total_job_links = 0
-        for i, result in enumerate(results):
-            links = result.links.get("internal", [])
-            filtered_links = [link["href"] for link in links if re.search(pattern=r"\d+\?type=standard", string=link["href"])]
-            job_links.append(filtered_links)
-            total_job_links += len(filtered_links)
-            
-        self.logger.info(f"Total {total_job_links} job page links crawled from {len(results)} search pages.")    
-         
-        return job_links
 
+        # # dispatcher 控制 concurrency / memory
+        # self.dispatcher = MemoryAdaptiveDispatcher(
+        #     memory_threshold_percent=70.0,
+        #     max_session_permit=5,
+        #     check_interval=2,
+        # )
 
-    def _generate_urls(self, keyword: str, total_page: int) -> list[str]:
-        urls = [f"https://hk.jobsdb.com/{keyword}-jobs?page={page}" for page in range(1, total_page+1)]
-        self.logger.info(f"Generated total {len(urls)} search pages - urls: \n{urls}\n")
-        
-        return urls
-
-    async def init_crawler(self):
+        # 單一 crawler 實例
         self.crawler = AsyncWebCrawler(config=self.browser_config)
 
-    # async crawler.
-    async def _crawl_pages(self, urls: List[str], config: CrawlerRunConfig) -> List[CrawlResult]:
-        async with self.crawler:
-            results = await self.crawler.arun_many(
-                urls=urls, 
-                config=config,
-                dispatcher=self.dispatcher
-            )
-        self.logger.info(f"Total {len(results)} pages crawled.")
-                
+        self.logger.info(f"{JobAdCrawler.__name__} initiated (large-scale mode).")
+
+    # -----------------------------
+    # helpers
+    # -----------------------------
+    def _generate_search_urls(self, keyword: str, total_pages: int) -> List[str]:
+        urls = [
+            f"https://hk.jobsdb.com/{keyword}-jobs?page={page}"
+            for page in range(1, total_pages + 1)
+        ]
+        self.logger.info(f"Generated {len(urls)} search URLs.")
+        return urls
+
+    def _extract_job_links(self, results: List[CrawlResult]) -> List[str]:
+        job_links = []
+        for res in results:
+            if not res.success:
+                continue
+            links = res.links.get("internal", [])
+            filtered = [
+                link["href"]
+                for link in links
+                if re.search(r"\d+\?type=standard", link["href"])
+            ]
+            job_links.extend(filtered)
+
+        self.logger.info(f"Extracted {len(job_links)} job links.")
+        return job_links
+
+    # -----------------------------
+    # core async crawling
+    # -----------------------------
+    async def _crawl_many_streaming(
+        self, urls: List[str], config: CrawlerRunConfig
+    ) -> List[CrawlResult]:
+        """
+        用 streaming 模式處理大量 URL：
+        - 邊爬邊處理
+        - 唔需要一次性全部載入記憶體
+        """
+        results: List[CrawlResult] = []
+
+        async for result in await self.crawler.arun_many(
+            urls=urls,
+            config=config,
+            # dispatcher=self.dispatcher,
+            dispatcher=None
+        ):
+            results.append(result)
+
+        self.logger.info(f"Streaming crawl completed: {len(results)} results.")
         return results
 
+    async def crawl_async(self, keyword: str, total_pages: int) -> List[CrawlResult]:
+        # 開 browser 一次
+        await self.crawler.start()
 
-    async def _crawl_all_job_pages_async(self, keyword: str, total_pages: int) -> List[CrawlResult]: 
-        
-        # initiate AsyncWebCrawler object.
-        await self.init_crawler()
-        
-        # Generate search pages.
-        urls = self._generate_urls(keyword=keyword, total_page=total_pages)
-        for i, url in enumerate(urls):
-            print(f"{i}: {url}")
+        # 1. 搜尋頁
+        search_urls = self._generate_search_urls(keyword, total_pages)
+        self.logger.info(f"Start crawling {len(search_urls)} search pages.")
 
-        self.logger.info(f"Start crawling total {len(urls)} search pages.")
-        # crawl all links for job pages from search pages.
-        results = await self._crawl_pages(urls=urls, config=self.crawl_config_search)
-        
-        # extract job ad links.
-        job_links = self._extract_job_links(results=results)
-        
-        # crawl all contents from each job pages by batch.
-        job_results = []
-        for links in job_links:
-            results = await self._crawl_pages(urls=links, config=self.crawl_config_job)
-            job_results.extend(results)
-        
-        return job_results
-    
-    # provide a synchronous interface for the async crawling method.
-    def crawl_all_job_pages(self, keyword: str, total_pages: int) -> List[CrawlResult]:
-        return asyncio.run(self._crawl_all_job_pages_async(keyword=keyword, total_pages=total_pages))
+        search_results = await self._crawl_many_streaming(
+            urls=search_urls,
+            config=self.crawl_config_search,
+        )
+
+        # 2. 抽 job links
+        job_links = self._extract_job_links(search_results)
+
+        # 3. job pages 分批 crawl（避免一次過幾千個 URL）
+        batch_size = settings.batch_size
+        all_job_results: List[CrawlResult] = []
+
+        self.logger.info(
+            f"Start crawling {len(job_links)} job pages in batches of {batch_size}."
+        )
+
+        for i in range(0, len(job_links), batch_size):
+            batch = job_links[i : i + batch_size]
+            self.logger.info(f"Crawling batch {i // batch_size + 1}: {len(batch)} URLs")
+
+            batch_results = await self._crawl_many_streaming(
+                urls=batch,
+                config=self.crawl_config_job,
+            )
+            all_job_results.extend(batch_results)
+
+        # 收尾：關 browser 一次
+        await self.crawler.close()
+
+        self.logger.info(
+            f"Completed crawling {len(all_job_results)} job pages (keyword={keyword})."
+        )
+        return all_job_results
+
+    # -----------------------------
+    # sync wrapper（如果你喺純 script 用）
+    # -----------------------------
+    def crawl(self, keyword: str, total_pages: int) -> List[CrawlResult]:
+        """
+        注意：如果你喺已有 event loop 環境（例如 FastAPI / Jupyter），
+        唔好用呢個，用 `await crawl_async(...)` 直接。
+        """
+        return asyncio.run(self.crawl_async(keyword, total_pages))

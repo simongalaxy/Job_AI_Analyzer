@@ -1,4 +1,5 @@
 from ollama import AsyncClient
+from openai import AsyncOpenAI
 from psycopg2.extras import RealDictRow
 import asyncio
 from pprint import pformat
@@ -11,13 +12,25 @@ from src.Settings import settings
 class JobExtractor:
     def __init__(self, logger):
         self.logger = logger
-        self.model_name = settings.ollama_extraction_model
-        if not self.model_name:
-            raise ValueError("OLLAMA_EXTRACTION_MODEL not set in .env file")
         
-        self.client = AsyncClient()
-        self.logger.info(f"Ollama Summarizer initialized with model: {self.model_name}")
-
+        # ollama localhost settings.
+        # self.model_name = settings.ollama_extraction_model
+        # if not self.model_name:
+        #     raise ValueError("OLLAMA_EXTRACTION_MODEL not set in .env file")
+        
+        # self.client = AsyncClient()
+        # self.logger.info(f"Ollama Summarizer initialized with model: {self.model_name}")
+        
+        # ollama cloud settings.
+        # Explicitly declare the remote host address
+        self.model_name = settings.ollama_cloud_model
+        self.base_url = settings.ollama_base_url
+        self.api_key = settings.ollama_api_key
+        self.client = AsyncClient(
+            host=self.base_url,
+            headers={"Authorization": f"Bearer {self.api_key}"}
+        )
+        
     async def _summarize_job_info(self, result: RealDictRow, keyword: str) -> ExtractedJobInfo:
         
         # get the information from result.

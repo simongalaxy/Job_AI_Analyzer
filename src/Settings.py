@@ -27,6 +27,10 @@ class Settings(BaseSettings):
     ollama_clustering_model: str
     ollama_categorizing_model: str
     ollama_insight_model: str
+    
+    ollama_api_key: str
+    ollama_base_url: str
+    ollama_cloud_model: str
 
     # folder paths for reports.
     report_path: str

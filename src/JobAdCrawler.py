@@ -45,13 +45,6 @@ class JobAdCrawler:
             stream=True,
         )
 
-        # # dispatcher 控制 concurrency / memory
-        # self.dispatcher = MemoryAdaptiveDispatcher(
-        #     memory_threshold_percent=70.0,
-        #     max_session_permit=5,
-        #     check_interval=2,
-        # )
-
         # 單一 crawler 實例
         self.crawler = AsyncWebCrawler(config=self.browser_config)
 

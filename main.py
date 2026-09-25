@@ -18,12 +18,6 @@ def fetch_and_save_jobs(keyword: str, total_pages: int, logger: Logger, dbhandle
     crawler = JobAdCrawler(logger=logger)
     extractor = JobExtractor(logger=logger)
     
-    # crawl all pages of job ads based on the keyword and total search pages.
-    # job_results = crawler.crawl_all_job_pages(
-    #     keyword=keyword, 
-    #     total_pages=int(total_pages)
-    # )
-    
     job_results = crawler.crawl(keyword=keyword, total_pages=int(total_pages))
     
     logger.info(f"Total {len(job_results)} job advertisements crawled.")
@@ -136,7 +130,7 @@ def main():
         fetch_and_save_jobs(keyword=keyword, total_pages=int(total_search_pages), logger=logger, dbhandler=dbhandler)
         
         # retrieve and generate insights and report.
-        retrieve_and_generate_insights(keyword=keyword, logger=logger, dbhandler=dbhandler)
+        # retrieve_and_generate_insights(keyword=keyword, logger=logger, dbhandler=dbhandler)
         
        
     return

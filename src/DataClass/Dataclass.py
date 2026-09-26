@@ -3,7 +3,13 @@ from typing import List, Optional
 
 
 
-class ExtractedJobInfo(BaseModel):
+class JobAd(BaseModel):
+    id: str
+    url: str
+    content: str
+
+
+class ExtractedInfo(BaseModel):
     id: Optional[str] = Field(default=None, description="job id")
     job_title: str = Field(description="job title")
     responsibilities: List[str] = Field(description="all responsibilities of the job")

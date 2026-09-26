@@ -12,11 +12,11 @@ class Settings(BaseSettings):
     log_level: str
     
     # database settings.
-    username: str
-    password: str
-    host: str
-    port: str
-    db_name: str
+    # username: str
+    # password: str
+    # host: str
+    # port: str
+    # db_name: str
     
     # neon database settings.
     neon_uri: str

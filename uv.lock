@@ -879,6 +879,7 @@ dependencies = [
     { name = "dotenv" },
     { name = "mdutils" },
     { name = "ollama" },
+    { name = "playwright" },
     { name = "psycopg2-binary" },
     { name = "pydantic-settings" },
 ]
@@ -889,6 +890,7 @@ requires-dist = [
     { name = "dotenv", specifier = ">=0.9.9" },
     { name = "mdutils", specifier = ">=1.8.1" },
     { name = "ollama", specifier = ">=0.6.2" },
+    { name = "playwright", specifier = ">=1.57.0" },
     { name = "psycopg2-binary", specifier = ">=2.9.11" },
     { name = "pydantic-settings", specifier = ">=2.14.2" },
 ]

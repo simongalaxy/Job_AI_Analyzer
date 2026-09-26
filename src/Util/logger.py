@@ -2,7 +2,7 @@ import logging
 import os
 from datetime import datetime
 
-from src.Settings import settings
+from .Settings import settings
 
 class Logger:
     def __init__(self, name: str):

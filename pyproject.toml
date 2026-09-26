@@ -5,11 +5,11 @@ description = "This is a project to crawl the job advertisements from jobsdb.com
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "crawl4ai>=0.7.8",
+    "bs4>=0.0.2",
+    "crawl4ai>=0.9.4",
     "dotenv>=0.9.9",
     "mdutils>=1.8.1",
     "ollama>=0.6.2",
-    "playwright>=1.57.0",
     "psycopg2-binary>=2.9.11",
     "pydantic-settings>=2.14.2",
 ]

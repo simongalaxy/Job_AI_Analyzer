@@ -5,8 +5,8 @@ import asyncio
 from pprint import pformat
 from typing import List
 
-from src.DataClass import ExtractedJobInfo
-from src.Settings import settings
+from src.DataClass.Dataclass import ExtractedJobInfo
+from src.Util.Settings import settings
 
 
 class JobExtractor:

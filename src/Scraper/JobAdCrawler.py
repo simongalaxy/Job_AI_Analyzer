@@ -10,7 +10,7 @@ from typing import List, AsyncGenerator
 import asyncio
 import re
 
-from src.Settings import settings
+from src.Util.Settings import settings
 
 class JobAdCrawler:
     def __init__(self, logger):

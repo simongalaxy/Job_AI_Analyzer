@@ -4,7 +4,7 @@ import json
 import os
 from mdutils.mdutils import MdUtils
 
-from src.Settings import settings
+from src.Util.Settings import settings
 
 def create_report_object(keyword: str) -> MdUtils:
 

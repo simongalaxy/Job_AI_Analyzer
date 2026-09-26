@@ -2,7 +2,7 @@ from ollama import Client   # Native Ollama client
 from pprint import pformat
 from pathlib import Path
 
-from src.Settings import settings
+from src.Util.Settings import settings
 
 class InsightProcessor:
     def __init__(self, logger):

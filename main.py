@@ -130,7 +130,7 @@ def main():
         fetch_and_save_jobs(keyword=keyword, total_pages=int(total_search_pages), logger=logger, dbhandler=dbhandler)
         
         # retrieve and generate insights and report.
-        # retrieve_and_generate_insights(keyword=keyword, logger=logger, dbhandler=dbhandler)
+        retrieve_and_generate_insights(keyword=keyword, logger=logger, dbhandler=dbhandler)
         
        
     return
